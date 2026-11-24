@@ -84,31 +84,38 @@ class AdminUserImportTest extends TestCase
         ]);
     }
 
-    public function test_import_generates_username_and_default_password_when_empty(): void
+    public function test_import_generates_username_and_password_from_nis_when_empty(): void
     {
         $admin = $this->createAdminUser();
         $kasirRole = Role::firstOrCreate(['name' => 'Kasir']);
 
         $csvContent = "Nama Siswa,NIS,Kelas,Username,Password\n".
-                      "Farhan Maulana,12345603,XI TKJ 1,,\n";
+                      "Farhan Maulana,12345603,XI TKJ 1,,\n".
+                      "Siti Tanpa NIS,,XI TKJ 2,,\n";
 
         $file = UploadedFile::fake()->createWithContent('siswa_auto.csv', $csvContent);
 
         $response = $this->actingAs($admin)->post(route('admin.users.import'), [
             'file' => $file,
-            'default_password' => 'defaultpass123',
+            'default_password' => 'fallback123',
         ]);
 
         $response->assertRedirect(route('admin.users'));
 
-        // Username otomatis pakai NIS jika username kosong
-        $user = User::where('student_number', '12345603')->first();
-        $this->assertNotNull($user);
-        $this->assertEquals('Farhan Maulana', $user->full_name);
-        $this->assertEquals('12345603', $user->username);
-        $this->assertEquals('XI TKJ 1', $user->class_group);
-        $this->assertEquals($kasirRole->id, $user->role_id);
-        $this->assertTrue(Hash::check('defaultpass123', $user->password));
+        // Siswa dengan NIS: Username dan Password otomatis menggunakan NIS
+        $userWithNis = User::where('student_number', '12345603')->first();
+        $this->assertNotNull($userWithNis);
+        $this->assertEquals('Farhan Maulana', $userWithNis->full_name);
+        $this->assertEquals('12345603', $userWithNis->username);
+        $this->assertEquals('XI TKJ 1', $userWithNis->class_group);
+        $this->assertEquals($kasirRole->id, $userWithNis->role_id);
+        $this->assertTrue(Hash::check('12345603', $userWithNis->password));
+
+        // Siswa tanpa NIS: Password memakai fallback password
+        $userWithoutNis = User::where('full_name', 'Siti Tanpa NIS')->first();
+        $this->assertNotNull($userWithoutNis);
+        $this->assertEquals('sititanpanis', $userWithoutNis->username);
+        $this->assertTrue(Hash::check('fallback123', $userWithoutNis->password));
     }
 
     public function test_import_updates_existing_user_when_username_matches(): void

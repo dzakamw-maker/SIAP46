@@ -355,6 +355,36 @@ class UserManagementTest extends TestCase
         $response->assertSee('searchUserInput', false);
     }
 
+    public function test_admin_users_are_displayed_at_the_top_of_users_list(): void
+    {
+        $adminRole = Role::create(['name' => 'Admin']);
+        $kasirRole = Role::create(['name' => 'Kasir']);
+
+        $admin = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Utama',
+            'username' => 'admin_utama',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        for ($i = 1; $i <= 5; $i++) {
+            User::create([
+                'role_id' => $kasirRole->id,
+                'full_name' => "Kasir Baru {$i}",
+                'username' => "kasir_{$i}",
+                'password' => 'secret123',
+                'is_active' => true,
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.users'));
+
+        $response->assertStatus(200);
+        $usersInView = $response->viewData('users');
+        $this->assertEquals($admin->id, $usersInView->first()->id);
+    }
+
     public function test_admin_can_search_users_by_name_or_username(): void
     {
         $adminRole = Role::create(['name' => 'Admin']);

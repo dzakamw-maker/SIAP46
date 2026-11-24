@@ -131,6 +131,8 @@ class AdminController extends Controller
         $selectedStatus = $request->query('status');
 
         $roles = Role::all();
+        $adminRoleId = $roles->firstWhere('name', 'Admin')?->id;
+        $guruRoleId = $roles->firstWhere('name', 'Guru')?->id;
 
         $users = User::with('role')
             ->when($search !== '', function ($query) use ($search) {
@@ -147,6 +149,14 @@ class AdminController extends Controller
             ->when($selectedStatus !== null && $selectedStatus !== '', function ($query) use ($selectedStatus) {
                 $query->where('is_active', (bool) $selectedStatus);
             })
+            ->orderByRaw('
+                CASE 
+                    WHEN users.id = ? THEN 0
+                    WHEN role_id = ? THEN 1
+                    WHEN role_id = ? THEN 2
+                    ELSE 3
+                END
+            ', [auth()->id() ?? 0, $adminRoleId ?? 0, $guruRoleId ?? 0])
             ->latest('id')
             ->get();
 
@@ -235,12 +245,9 @@ class AdminController extends Controller
             ['description' => 'Siswa / Kasir BNI']
         );
 
-        $defaultPassword = $request->filled('default_password')
+        $fallbackPassword = $request->filled('default_password')
             ? (string) $request->input('default_password')
-            : 'password';
-
-        // Pre-hash password default sekali agar proses massal tidak terbebani ratusan putaran Bcrypt CPU
-        $hashedDefaultPassword = Hash::make($defaultPassword);
+            : null;
 
         $corruptedTokens = ['#ref!', '#n/a', '#value!', '#name?', 'nan', '-', 'null', 'undefined', 'belum', 'sudah', 'abstain'];
 
@@ -250,9 +257,10 @@ class AdminController extends Controller
         ];
 
         $prefixSkipKeywords = [
-            'mengetahui', 'wali kelas', 'guru', 'wakasek', 'kurikulum', 'kepala sekolah', 'rekapitulasi',
+            'mengetahui', 'wali kelas', 'wali', 'guru', 'wakasek', 'kurikulum', 'kepala sekolah', 'rekapitulasi',
             'keterangan', 'daftar hadir', 'tahun pelajaran', 'tahun ajaran', 'bulan',
             'jumlah', 'total', 'catatan', 'gaya belajar',
+            'yayasan', 'smk', 'smk wikrama', 'jl.', 'jalan', 'telp', 'email', 'website', 'http', 'www', 'rombel', 'kelas',
         ];
 
         $detectHeaderMap = function (array $row): ?array {
@@ -383,7 +391,7 @@ class AdminController extends Controller
             $detectedClassFromTitle,
             $detectHeaderMap,
             $corruptedTokens,
-            $hashedDefaultPassword,
+            $fallbackPassword,
             $kasirRole,
             $exactSkipKeywords,
             $prefixSkipKeywords,
@@ -405,10 +413,10 @@ class AdminController extends Controller
                     continue;
                 }
 
-                // 2. Cek apakah ada penanda kelas/rombel baru pada judul tabel
+                // 2. Cek apakah ada penanda kelas/rombel baru pada judul tabel (hindari Wali Kelas)
                 $rowCombinedText = implode(' ', $row);
-                if (preg_match('/(?:rombel|kelas)\s*[:\s-]?\s*([A-Za-z0-9\-\.\/]+(?:\s+(?!tahun|semester|tp|ta)[A-Za-z0-9\-\.\/]+)*)/i', $rowCombinedText, $m)) {
-                    $cand = trim($m[1]);
+                if (! preg_match('/wali\s*kelas/i', $rowCombinedText) && preg_match('/(?:rombel|(?<!wali\s)kelas)\s*[:\s-]?\s*([A-Za-z0-9\-\.\/]+(?:\s+(?!tahun|semester|tp|ta|guru|s\.pd|s\.m|m\.pd)[A-Za-z0-9\-\.\/]+)*)/i', $rowCombinedText, $m)) {
+                    $cand = ltrim(trim($m[1]), ": \t\n\r\0\x0B");
                     if (! in_array(strtolower($cand), ['campuran', 'mpls', 'matrikulasi', '#ref!', 'nan'], true)) {
                         $activeClassTitle = $cand;
                     }
@@ -421,7 +429,16 @@ class AdminController extends Controller
                     continue;
                 }
 
+                // Abaikan jika cell diawali tanda baca atau berupa informasi kontak/link/yayasan
+                if (str_starts_with($fullName, ':') || str_starts_with($fullName, '-') || str_starts_with($fullName, '.')) {
+                    continue;
+                }
+
                 $lowerName = strtolower($fullName);
+
+                if (preg_match('/(?:@|www\.|\.sch\.id|\.com|telp\.|0251-)/i', $lowerName)) {
+                    continue;
+                }
 
                 // Abaikan jika cell berisi token formula rusak Excel (#REF!, NaN, dst)
                 if (in_array($lowerName, $corruptedTokens, true)) {
@@ -506,7 +523,15 @@ class AdminController extends Controller
                     continue;
                 }
 
-                $passwordToUse = $passSpecified !== '' ? $passSpecified : $hashedDefaultPassword;
+                if ($passSpecified !== '') {
+                    $passwordToUse = $passSpecified;
+                } elseif ($nis !== null && $nis !== '') {
+                    $passwordToUse = $nis;
+                } elseif ($fallbackPassword !== null) {
+                    $passwordToUse = $fallbackPassword;
+                } else {
+                    $passwordToUse = $username;
+                }
 
                 $existing = User::where('username', $username)->first();
                 if ($existing) {

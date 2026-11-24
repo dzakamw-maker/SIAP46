@@ -128,24 +128,40 @@ class SimpleSpreadsheetReader
             $xml->close();
         }
 
-        // 2. Ekstrak sheet1.xml (atau worksheet pertama yang ditemukan)
-        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
-        if ($sheetXml === false) {
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i);
-                if ($stat && str_starts_with($stat['name'], 'xl/worksheets/sheet') && str_ends_with($stat['name'], '.xml')) {
-                    $sheetXml = $zip->getFromName($stat['name']);
-                    break;
-                }
+        // 2. Dapatkan seluruh worksheet dalam workbook (mendukung multi-sheet)
+        $sheetFiles = self::getWorksheetFiles($zip);
+
+        $rows = [];
+        foreach ($sheetFiles as $sheetInfo) {
+            $sheetXml = $zip->getFromName($sheetInfo['path']);
+            if ($sheetXml === false) {
+                continue;
+            }
+
+            // Jika sheet memiliki nama (misal nama tab "MPLB XI-1"), sematkan penanda rombel
+            if (! empty($sheetInfo['name'])) {
+                $rows[] = ['Rombel', ': ' . $sheetInfo['name']];
+            }
+
+            $sheetRows = self::parseWorksheetXml($sheetXml, $sharedStrings);
+            foreach ($sheetRows as $r) {
+                $rows[] = $r;
             }
         }
 
-        if ($sheetXml === false) {
-            $zip->close();
+        $zip->close();
 
-            return [];
-        }
+        return $rows;
+    }
 
+    /**
+     * Parse konten XML worksheet menjadi array baris sel.
+     *
+     * @param  array<int, string>  $sharedStrings
+     * @return array<int, array<int, string>>
+     */
+    private static function parseWorksheetXml(string $sheetXml, array $sharedStrings): array
+    {
         $xml = new XMLReader;
         $xml->xml($sheetXml);
 
@@ -221,9 +237,92 @@ class SimpleSpreadsheetReader
         }
 
         $xml->close();
-        $zip->close();
 
         return $rows;
+    }
+
+    /**
+     * Dapatkan daftar seluruh file worksheet yang ada di dalam workbook .xlsx beserta namanya.
+     *
+     * @return array<int, array{name: string, path: string}>
+     */
+    private static function getWorksheetFiles(ZipArchive $zip): array
+    {
+        $sheets = [];
+
+        $workbookRelsXml = $zip->getFromName('xl/_rels/workbook.xml.rels');
+        $relMap = [];
+        if ($workbookRelsXml !== false) {
+            $xml = new XMLReader;
+            $xml->xml($workbookRelsXml);
+            while ($xml->read()) {
+                if ($xml->nodeType === XMLReader::ELEMENT && $xml->name === 'Relationship') {
+                    $id = $xml->getAttribute('Id');
+                    $target = $xml->getAttribute('Target');
+                    if ($id && $target) {
+                        $targetPath = str_replace('\\', '/', ltrim($target, '/'));
+                        if (! str_starts_with($targetPath, 'xl/')) {
+                            $targetPath = 'xl/' . $targetPath;
+                        }
+                        $relMap[$id] = $targetPath;
+                    }
+                }
+            }
+            $xml->close();
+        }
+
+        $workbookXml = $zip->getFromName('xl/workbook.xml');
+        if ($workbookXml !== false && ! empty($relMap)) {
+            $xml = new XMLReader;
+            $xml->xml($workbookXml);
+            while ($xml->read()) {
+                if ($xml->nodeType === XMLReader::ELEMENT && $xml->name === 'sheet') {
+                    $name = (string) $xml->getAttribute('name');
+                    $rId = (string) ($xml->getAttribute('r:id') ?: $xml->getAttribute('id'));
+                    if (! $rId) {
+                        if ($xml->moveToFirstAttribute()) {
+                            do {
+                                if ($xml->localName === 'id' || $xml->name === 'r:id') {
+                                    $rId = (string) $xml->value;
+                                    break;
+                                }
+                            } while ($xml->moveToNextAttribute());
+                            $xml->moveToElement();
+                        }
+                    }
+                    if ($rId && isset($relMap[$rId])) {
+                        $sheets[] = [
+                            'name' => $name,
+                            'path' => $relMap[$rId],
+                        ];
+                    }
+                }
+            }
+            $xml->close();
+        }
+
+        if (! empty($sheets)) {
+            return $sheets;
+        }
+
+        // Fallback: scan seluruh file xl/worksheets/*.xml secara natural order
+        $sheetPaths = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            if ($stat && preg_match('#^xl/worksheets/sheet\d+\.xml$#i', $stat['name'])) {
+                $sheetPaths[] = $stat['name'];
+            }
+        }
+        natsort($sheetPaths);
+
+        foreach ($sheetPaths as $p) {
+            $sheets[] = [
+                'name' => '',
+                'path' => $p,
+            ];
+        }
+
+        return $sheets;
     }
 
     private static function isZipFile(string $filePath): bool

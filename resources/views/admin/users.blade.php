@@ -245,7 +245,7 @@
                     Pastikan baris pertama berisi header: <strong>Nama Siswa</strong>, <strong>NIS</strong>, <strong>Kelas</strong>, <strong>Username</strong> <em>(opsional)</em>, <strong>Password</strong> <em>(opsional)</em>.
                 </p>
                 <div class="mt-2 pt-2 border-t border-emerald-200/60 text-[11px] text-emerald-800">
-                    💡 <em>Semua siswa yang diimport otomatis mendapat role <strong>Kasir</strong> dan status <strong>Aktif</strong>. Jika username kosong, otomatis menggunakan NIS.</em>
+                    💡 <em>Semua siswa yang diimport otomatis mendapat role <strong>Kasir</strong> dan status <strong>Aktif</strong>. Username dan Password awal otomatis menggunakan nomor <strong>NIS</strong> siswa.</em>
                 </div>
             </div>
 
@@ -262,11 +262,11 @@
             <!-- Default Password -->
             <div class="mb-6">
                 <label for="default_password" class="block mb-1.5 text-sm font-semibold text-gray-800">
-                    Password Default <span class="text-xs font-normal text-gray-500">(Jika tidak ada di file)</span>
+                    Password Cadangan <span class="text-xs font-normal text-gray-500">(Hanya digunakan jika baris siswa tidak memiliki NIS)</span>
                 </label>
-                <input type="text" name="default_password" id="default_password" value="password" placeholder="Minimal 6 karakter (default: password)"
+                <input type="text" name="default_password" id="default_password" placeholder="Opsional (minimal 6 karakter)"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 font-mono">
-                <span class="text-[11px] text-gray-400 mt-1 block">Siswa dapat login menggunakan password ini atau mengubahnya nanti.</span>
+                <span class="text-[11px] text-gray-400 mt-1 block">Jika dikosongkan, siswa tanpa NIS akan menggunakan username-nya sebagai password awal.</span>
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
