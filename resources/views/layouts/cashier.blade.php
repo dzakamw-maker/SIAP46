@@ -5,18 +5,18 @@
     
     <!-- Sidebar -->
     <aside class="w-64 bg-orange-600 text-white flex flex-col shadow-lg z-10">
-        <div class="h-16 flex items-center justify-center border-b border-orange-500">
+        <a href="{{ url('/') }}" class="h-16 flex items-center justify-center border-b border-orange-500">
             <h1 class="text-xl font-bold flex items-center">
                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 Kasir Agen BNI
             </h1>
-        </div>
+        </a>
         <div class="p-4 bg-orange-700">
             <p class="text-xs text-orange-200">Kasir Aktif</p>
             <p class="font-medium">{{ auth()->user()->full_name }}</p>
         </div>
         <nav class="flex-1 px-4 py-4 space-y-2">
-            <a href="{{ route('kasir.dashboard') }}" class="flex items-center px-4 py-3 {{ request()->routeIs('kasir.dashboard') ? 'bg-white text-orange-600' : 'text-white hover:bg-orange-500' }} rounded-lg font-medium shadow-sm transition-colors">
+            <a href="{{ url('/') }}" class="flex items-center px-4 py-3 {{ request()->is('/') || request()->routeIs('kasir.dashboard') ? 'bg-white text-orange-600' : 'text-white hover:bg-orange-500' }} rounded-lg font-medium shadow-sm transition-colors">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 Input Transaksi
             </a>

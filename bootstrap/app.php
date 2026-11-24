@@ -19,11 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectTo(
             guests: '/login',
-            users: function (Request $request) {
-                return auth()->check() && (auth()->user()->role?->name === 'Admin' || auth()->user()->role?->name === 'Guru')
-                    ? '/admin'
-                    : '/kasir';
-            }
+            users: '/',
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -33,13 +33,7 @@ class AuthController extends Controller
                 ]);
             }
 
-            // Redirect based on role
-            // Assume Role names are 'Admin', 'Kasir'
-            if ($user->role?->name === 'Admin' || $user->role?->name === 'Guru') {
-                return redirect()->intended('/admin');
-            }
-
-            return redirect()->intended('/kasir');
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([

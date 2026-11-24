@@ -39,7 +39,7 @@ class ExampleTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_authenticated_admin_visiting_home_is_redirected_to_admin_dashboard(): void
+    public function test_authenticated_admin_visiting_home_sees_admin_dashboard(): void
     {
         $adminRole = Role::create(['name' => 'Admin']);
         $admin = User::create([
@@ -52,10 +52,12 @@ class ExampleTest extends TestCase
 
         $response = $this->actingAs($admin)->get('/');
 
-        $response->assertRedirect('/admin');
+        $response->assertStatus(200);
+        $response->assertSee('Dashboard');
+        $response->assertSee('Total Transaksi Hari Ini');
     }
 
-    public function test_authenticated_cashier_visiting_home_is_redirected_to_cashier_dashboard(): void
+    public function test_authenticated_cashier_visiting_home_sees_cashier_dashboard(): void
     {
         $kasirRole = Role::create(['name' => 'Kasir']);
         $kasir = User::create([
@@ -68,6 +70,7 @@ class ExampleTest extends TestCase
 
         $response = $this->actingAs($kasir)->get('/');
 
-        $response->assertRedirect('/kasir');
+        $response->assertStatus(200);
+        $response->assertSee('Input Transaksi');
     }
 }

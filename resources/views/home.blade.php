@@ -48,11 +48,11 @@
                 <div class="flex items-center gap-4">
                     @auth
                         @if(auth()->user()->role && (auth()->user()->role->name === 'Admin' || auth()->user()->role->name === 'Guru'))
-                            <a href="{{ route('admin.dashboard') }}" class="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-[#005e6a] hover:bg-[#004750] shadow-sm transition-all hover:scale-105">
+                            <a href="{{ url('/') }}" class="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-[#005e6a] hover:bg-[#004750] shadow-sm transition-all hover:scale-105">
                                 Panel Admin
                             </a>
                         @else
-                            <a href="{{ route('kasir.dashboard') }}" class="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-[#005e6a] hover:bg-[#004750] shadow-sm transition-all hover:scale-105">
+                            <a href="{{ url('/') }}" class="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-[#005e6a] hover:bg-[#004750] shadow-sm transition-all hover:scale-105">
                                 Panel Kasir
                             </a>
                         @endif

@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TransactionType;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
     /**
-     * Menampilkan halaman beranda (homepage) publik SIAP46.
+     * Menampilkan halaman root SIAP46:
+     * - Jika user sudah login sebagai Admin/Guru: tampilkan Dashboard Admin langsung di URL '/'
+     * - Jika user sudah login sebagai Kasir: tampilkan Dashboard Kasir langsung di URL '/'
+     * - Jika guest (belum login): tampilkan Landing Page Beranda Publik
      */
-    public function index(): View
+    public function index(AdminController $adminController, CashierController $cashierController): View
     {
-        $services = collect();
+        if (auth()->check()) {
+            $roleName = auth()->user()->role?->name;
+            if ($roleName === 'Admin' || $roleName === 'Guru') {
+                return $adminController->dashboard();
+            }
 
-        if (Schema::hasTable('transaction_types')) {
-            $services = TransactionType::query()
-                ->where('is_active', true)
-                ->get();
+            return $cashierController->dashboard();
         }
 
-        return view('home', [
-            'services' => $services,
-        ]);
+        return view('home');
     }
 }

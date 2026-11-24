@@ -4,7 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('guest');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
@@ -24,6 +24,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/eod/{dailyRecap}/verify', [AdminController::class, 'verifyEod'])->name('admin.eod.verify');
         Route::get('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
         Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
+        Route::get('/users/template', [AdminController::class, 'downloadUserTemplate'])->name('admin.users.template');
+        Route::post('/users/import', [AdminController::class, 'importUsers'])->name('admin.users.import');
+        Route::delete('/users/delete-all-cashiers', [AdminController::class, 'deleteAllCashiers'])->name('admin.users.delete-all-cashiers');
         Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
         Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
         Route::match(['put', 'patch'], '/users/{user}/edit', [AdminController::class, 'updateUser']);
@@ -40,6 +43,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/check-default', [CashierController::class, 'checkCustomerDefault'])->name('kasir.customers.check-default');
         Route::get('/stamps', [CashierController::class, 'stamps'])->name('kasir.stamps');
         Route::post('/stamps', [CashierController::class, 'storeStamp'])->name('kasir.stamps.store');
+        Route::post('/opening-balance', [CashierController::class, 'storeOpeningBalance'])->name('kasir.opening-balance.store');
         Route::get('/eod', [CashierController::class, 'eod'])->name('kasir.eod');
+        Route::post('/eod', [CashierController::class, 'storeEod'])->name('kasir.eod.store');
     });
 });
