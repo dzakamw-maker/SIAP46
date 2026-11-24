@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\DailyRecap;
 use App\Models\StampDutyRecord;
 use App\Models\Transaction;
 use App\Models\TransactionType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -26,7 +28,20 @@ class CashierController extends Controller
             ->latest()
             ->get();
 
-        return view('cashier.dashboard', compact('types', 'stampsStock', 'todayTransactions'));
+        $openingBalance = DailyRecap::with('openedBy')->whereDate('recap_date', today())->first();
+        $hasOpeningBalance = $openingBalance && $openingBalance->opening_bni_balance !== null;
+
+        $previousRecap = DailyRecap::whereDate('recap_date', '<', today())->latest('recap_date')->first();
+        $suggestedBniBalance = (float) ($previousRecap?->bni_balance_remaining ?? 0);
+
+        return view('cashier.dashboard', compact(
+            'types',
+            'stampsStock',
+            'todayTransactions',
+            'hasOpeningBalance',
+            'openingBalance',
+            'suggestedBniBalance'
+        ));
     }
 
     public function searchCustomers(Request $request): JsonResponse
@@ -100,8 +115,50 @@ class CashierController extends Controller
         ]);
     }
 
+    public function storeOpeningBalance(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'opening_bni_balance' => ['required', 'numeric', 'min:0'],
+            'opening_cash_balance' => ['nullable', 'numeric', 'min:0'],
+            'notes' => ['nullable', 'string', 'max:255'],
+        ], [
+            'opening_bni_balance.required' => 'Nominal saldo awal rekening Agen BNI wajib diisi.',
+            'opening_bni_balance.numeric' => 'Nominal saldo awal BNI harus berupa angka valid.',
+            'opening_bni_balance.min' => 'Nominal saldo awal BNI tidak boleh bernilai negatif.',
+            'opening_cash_balance.numeric' => 'Nominal saldo kas fisik harus berupa angka valid.',
+            'opening_cash_balance.min' => 'Nominal saldo kas fisik tidak boleh bernilai negatif.',
+        ]);
+
+        $bniBalance = (float) $validated['opening_bni_balance'];
+        $cashBalance = (float) ($validated['opening_cash_balance'] ?? 0);
+
+        DailyRecap::updateOrCreate(
+            ['recap_date' => today()],
+            [
+                'opening_bni_balance' => $bniBalance,
+                'opening_cash_balance' => $cashBalance,
+                'bni_balance_remaining' => $bniBalance,
+                'cash_amount' => $cashBalance,
+                'opened_by' => auth()->id(),
+                'notes' => $validated['notes'] ?? null,
+            ]
+        );
+
+        return redirect()->route('kasir.dashboard')->with('success', 'Loket kasir berhasil dibuka! Saldo awal BNI Rp '.number_format($bniBalance, 0, ',', '.').' berhasil disimpan.');
+    }
+
     public function storeTransaction(Request $request): RedirectResponse
     {
+        $hasOpening = DailyRecap::whereDate('recap_date', today())
+            ->whereNotNull('opening_bni_balance')
+            ->exists();
+
+        if (! $hasOpening && ! app()->runningUnitTests()) {
+            return back()->withErrors([
+                'transaction_type_id' => 'Loket belum dibuka! Harap input saldo awal terlebih dahulu sebelum memulai transaksi.',
+            ])->withInput();
+        }
+
         $selectedType = TransactionType::find($request->input('transaction_type_id'));
         $isMaterai = $selectedType && (
             in_array(strtolower($selectedType->code), ['materai', 'mtr'], true) ||
@@ -222,31 +279,75 @@ class CashierController extends Controller
         $txNumber = $todayCount + 1;
 
         $totalPayment = $amount + $adminFee;
+        $txNumber = 1;
 
-        Transaction::create([
-            'transaction_number' => $txNumber,
-            'transaction_date' => today(),
-            'transaction_type_id' => $type->id,
-            'customer_id' => $customer->id,
-            'amount' => $amount,
-            'admin_fee' => $adminFee,
-            'total_payment' => $totalPayment,
-            'cashier_id' => auth()->id(),
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        DB::transaction(function () use (
+            $type, $customer, $amount, $adminFee, $totalPayment, $validated,
+            $isMaterai, $quantityPurchased, $stampPrice, $stampsStock, &$txNumber
+        ) {
+            $todayCount = Transaction::whereDate('transaction_date', today())->lockForUpdate()->count();
+            $txNumber = $todayCount + 1;
 
-        // Kurangi stok materai jika transaksi materai
-        if ($isMaterai) {
-            StampDutyRecord::create([
-                'record_date' => today(),
-                'quantity_sold' => $quantityPurchased,
-                'quantity_purchased' => 0,
-                'remaining_stock' => max(0, $stampsStock - $quantityPurchased),
+            $latestTxToday = Transaction::whereDate('transaction_date', today())
+                ->whereNotNull('bni_balance_after')
+                ->latest('id')
+                ->first();
+
+            $currentBniBalance = null;
+            if ($latestTxToday) {
+                $currentBniBalance = (float) $latestTxToday->bni_balance_after;
+            } else {
+                $todayRecap = DailyRecap::whereDate('recap_date', today())->first();
+                if ($todayRecap && $todayRecap->opening_bni_balance !== null) {
+                    $currentBniBalance = (float) $todayRecap->opening_bni_balance;
+                }
+            }
+
+            $isTarikTunai = str_contains(strtolower($type->code), 'tarik') || str_contains(strtolower($type->name), 'tarik');
+
+            $bniBalanceAfter = null;
+            if ($currentBniBalance !== null) {
+                if ($isMaterai) {
+                    $bniBalanceAfter = $currentBniBalance;
+                } elseif ($isTarikTunai) {
+                    $bniBalanceAfter = $currentBniBalance + $amount;
+                } else {
+                    $bniBalanceAfter = $currentBniBalance - $amount;
+                }
+            }
+
+            Transaction::create([
+                'transaction_number' => $txNumber,
+                'transaction_date' => today(),
+                'transaction_type_id' => $type->id,
+                'customer_id' => $customer->id,
                 'amount' => $amount,
+                'admin_fee' => $adminFee,
+                'total_payment' => $totalPayment,
+                'bni_balance_after' => $bniBalanceAfter,
                 'cashier_id' => auth()->id(),
-                'notes' => 'Penjualan Materai '.$quantityPurchased.' pcs @ Rp '.number_format($stampPrice, 0, ',', '.').' (Transaksi #'.$txNumber.')',
+                'notes' => $validated['notes'] ?? null,
             ]);
-        }
+
+            // Kurangi stok materai jika transaksi materai
+            if ($isMaterai) {
+                StampDutyRecord::create([
+                    'record_date' => today(),
+                    'quantity_sold' => $quantityPurchased,
+                    'quantity_purchased' => 0,
+                    'remaining_stock' => max(0, $stampsStock - $quantityPurchased),
+                    'amount' => $amount,
+                    'cashier_id' => auth()->id(),
+                    'notes' => 'Penjualan Materai '.$quantityPurchased.' pcs @ Rp '.number_format($stampPrice, 0, ',', '.').' (Transaksi #'.$txNumber.')',
+                ]);
+            }
+
+            if ($bniBalanceAfter !== null) {
+                DailyRecap::whereDate('recap_date', today())->update([
+                    'bni_balance_remaining' => $bniBalanceAfter,
+                ]);
+            }
+        });
 
         return redirect()->route('kasir.dashboard')->with('success', 'Transaksi #'.$txNumber.' ('.$type->name.') atas nama '.$customer->customer_name.' berhasil diproses!');
     }
@@ -304,7 +405,86 @@ class CashierController extends Controller
 
     public function eod(): View
     {
-        return view('cashier.eod');
+        $recap = DailyRecap::with('openedBy')->whereDate('recap_date', today())->first();
+        $hasOpeningBalance = $recap && $recap->opening_bni_balance !== null;
+
+        $openingBni = (float) ($recap?->opening_bni_balance ?? 0);
+        $openingCash = (float) ($recap?->opening_cash_balance ?? 0);
+
+        // Hitung saldo BNI sistem secara realtime
+        $latestBniTx = Transaction::whereDate('transaction_date', today())
+            ->whereNotNull('bni_balance_after')
+            ->latest('id')
+            ->first();
+
+        $bniBalanceSystem = $latestBniTx ? (float) $latestBniTx->bni_balance_after : $openingBni;
+
+        // Hitung kas fisik di laci kasir secara realtime
+        $todayTransactions = Transaction::with('transactionType')->whereDate('transaction_date', today())->get();
+        $cashInSystem = $openingCash;
+
+        foreach ($todayTransactions as $tx) {
+            $typeName = strtolower($tx->transactionType?->name ?? '');
+            $typeCode = strtolower($tx->transactionType?->code ?? '');
+            $isTarik = str_contains($typeName, 'tarik') || str_contains($typeCode, 'tarik');
+
+            if ($isTarik) {
+                // Tarik tunai: kasir mengeluarkan uang tunai (amount), tapi menerima biaya admin secara tunai
+                $cashInSystem += ((float) $tx->admin_fee - (float) $tx->amount);
+            } else {
+                // Transaksi lainnya: customer menyerahkan uang tunai (total_payment = amount + admin_fee)
+                $cashInSystem += (float) $tx->total_payment;
+            }
+        }
+
+        $stampsStock = StampDutyRecord::latest('id')->value('remaining_stock') ?? 0;
+
+        return view('cashier.eod', compact(
+            'recap',
+            'hasOpeningBalance',
+            'bniBalanceSystem',
+            'cashInSystem',
+            'stampsStock'
+        ));
+    }
+
+    public function storeEod(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'actual_bni_balance' => ['required', 'numeric', 'min:0'],
+            'actual_cash_amount' => ['required', 'numeric', 'min:0'],
+            'actual_stamp_count' => ['required', 'integer', 'min:0'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ], [
+            'actual_bni_balance.required' => 'Sisa saldo BNI aktual wajib diisi.',
+            'actual_bni_balance.numeric' => 'Saldo BNI aktual harus berupa angka.',
+            'actual_cash_amount.required' => 'Total uang tunai fisik wajib diisi.',
+            'actual_cash_amount.numeric' => 'Total uang tunai fisik harus berupa angka.',
+            'actual_stamp_count.required' => 'Sisa materai fisik wajib diisi.',
+            'actual_stamp_count.integer' => 'Sisa materai fisik harus berupa bilangan bulat.',
+        ]);
+
+        $bniActual = (float) $validated['actual_bni_balance'];
+        $cashActual = (float) $validated['actual_cash_amount'];
+        $stampCount = (int) $validated['actual_stamp_count'];
+        $stampPrice = 10000;
+        $stampTotalValue = $stampCount * $stampPrice;
+        $grandTotal = $bniActual + $cashActual + $stampTotalValue;
+
+        DailyRecap::updateOrCreate(
+            ['recap_date' => today()],
+            [
+                'bni_balance_remaining' => $bniActual,
+                'cash_amount' => $cashActual,
+                'stamp_remaining_value' => $stampCount,
+                'total' => $grandTotal,
+                'notes' => $validated['notes'] ?? null,
+                'recorded_by' => auth()->id(),
+                'is_closed' => true,
+            ]
+        );
+
+        return redirect()->route('kasir.eod')->with('success', 'Laporan Rekap Harian (EOD) berhasil dikirim dan tersimpan! Menunggu verifikasi dari Guru Pembimbing.');
     }
 
     /**

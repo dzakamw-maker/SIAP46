@@ -27,6 +27,53 @@
             <li>{{ $error }}</li>
         @endforeach
     </ul>
+@endif
+
+@if($hasOpeningBalance)
+<!-- Banner Loket Aktif -->
+<div class="mb-6 p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-200 text-emerald-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+    <div class="flex items-center gap-3">
+        <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+        <div>
+            <span class="font-bold text-emerald-800">Loket Hari Ini Aktif</span>
+            <span class="text-xs text-emerald-700 ml-1">
+                • Dibuka oleh: <strong class="font-semibold">{{ $openingBalance->openedBy?->full_name ?? $openingBalance->openedBy?->username ?? 'Kasir' }}</strong>
+                • Saldo Awal BNI: <strong class="font-semibold">Rp {{ number_format($openingBalance->opening_bni_balance, 0, ',', '.') }}</strong>
+                @if($openingBalance->opening_cash_balance > 0)
+                • Kas Laci: <strong class="font-semibold">Rp {{ number_format($openingBalance->opening_cash_balance, 0, ',', '.') }}</strong>
+                @endif
+            </span>
+        </div>
+    </div>
+    <div class="flex items-center gap-2 text-xs">
+        <a href="{{ route('kasir.eod') }}" class="font-semibold text-emerald-700 hover:text-emerald-800 hover:underline">
+            Rekap EOD &rarr;
+        </a>
+    </div>
+</div>
+@else
+<!-- Banner Peringatan Loket Belum Dibuka -->
+<div class="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+    <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+            <span class="font-bold text-amber-800">Loket Kasir Belum Dibuka Hari Ini</span>
+            <p class="text-xs text-amber-700 mt-0.5">
+                Transaksi belum dapat diproses. Cukup salah satu kasir yang bertugas membuka loket dengan menginput saldo awal Agen BNI pagi ini.
+            </p>
+        </div>
+    </div>
+    <button type="button" onclick="openOpeningBalanceModal()" class="inline-flex items-center justify-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors whitespace-nowrap cursor-pointer">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Buka Loket Sekarang
+    </button>
 </div>
 @endif
 
@@ -168,9 +215,18 @@
                         <button type="reset" onclick="setTimeout(() => { updateTotal(); syncTransactionType(); }, 50)" class="text-gray-600 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 transition-colors">
                             Batal
                         </button>
+                        @if(! $hasOpeningBalance)
+                        <button type="button" onclick="openOpeningBalanceModal()" class="text-white bg-amber-600 hover:bg-amber-700 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            Buka Loket Dahulu
+                        </button>
+                        @else
                         <button type="submit" class="text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all hover:scale-[1.01]">
                             Proses Transaksi
                         </button>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -261,6 +317,103 @@
                 </button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal Input Saldo Awal (Buka Loket Hari Ini) -->
+<div id="openingBalanceModal" class="fixed inset-0 z-50 flex items-center justify-center {{ $hasOpeningBalance ? 'hidden' : '' }} bg-black/50 backdrop-blur-xs transition-opacity p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100">
+        <div class="px-6 py-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">Buka Loket Kasir</h3>
+                    <p class="text-xs text-orange-100">Input Saldo Awal Hari Ini ({{ now()->translatedFormat('l, d F Y') }})</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeOpeningBalanceModal()" class="text-white/80 hover:text-white rounded-lg p-1.5 hover:bg-white/10 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form action="{{ route('kasir.opening-balance.store') }}" method="POST" class="p-6">
+            @csrf
+            
+            <div class="p-3.5 bg-amber-50/80 rounded-xl border border-amber-200/80 text-xs text-amber-900 mb-5 flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="leading-relaxed">
+                    Pengisian saldo awal bersifat <strong>opsional per kasir</strong>: cukup salah satu kasir yang mengisi pagi ini. 
+                    Namun transaksi <strong>belum dapat diproses</strong> hingga saldo awal diinput.
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <!-- Saldo Awal Rekening BNI -->
+                <div>
+                    <label for="opening_bni_balance" class="block mb-1.5 text-sm font-semibold text-gray-800">
+                        Saldo Rekening Agen BNI (Rp) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm font-bold">Rp</span>
+                        <input type="number" step="any" min="0" name="opening_bni_balance" id="opening_bni_balance" required
+                            value="{{ old('opening_bni_balance', $suggestedBniBalance > 0 ? $suggestedBniBalance : '') }}"
+                            placeholder="Contoh: 5000000"
+                            class="pl-10 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono font-medium">
+                    </div>
+                    @if($suggestedBniBalance > 0)
+                        <div class="mt-1.5 flex items-center justify-between text-xs">
+                            <span class="text-gray-500">Sisa saldo hari kemarin: <strong>Rp {{ number_format($suggestedBniBalance, 0, ',', '.') }}</strong></span>
+                            <button type="button" onclick="document.getElementById('opening_bni_balance').value = '{{ $suggestedBniBalance }}'" class="text-orange-600 hover:text-orange-700 font-medium hover:underline">
+                                Gunakan Sisa Kemarin
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Kas Tunai Laci -->
+                <div>
+                    <label for="opening_cash_balance" class="block mb-1.5 text-sm font-semibold text-gray-800">
+                        Uang Kas Tunai di Laci Kasir (Rp) <span class="text-xs font-normal text-gray-500">(Opsional)</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm font-bold">Rp</span>
+                        <input type="number" step="any" min="0" name="opening_cash_balance" id="opening_cash_balance"
+                            value="{{ old('opening_cash_balance', 0) }}"
+                            placeholder="Contoh: 500000"
+                            class="pl-10 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono">
+                    </div>
+                    <span class="text-[11px] text-gray-400 mt-1 block">Uang kembalian / modal kas fisik di laci saat loket dibuka.</span>
+                </div>
+
+                <!-- Catatan -->
+                <div>
+                    <label for="opening_notes" class="block mb-1.5 text-sm font-semibold text-gray-800">
+                        Catatan Pembukaan Loket <span class="text-xs font-normal text-gray-500">(Opsional)</span>
+                    </label>
+                    <input type="text" name="notes" id="opening_notes" value="{{ old('notes') }}"
+                        placeholder="Contoh: Saldo disesuaikan mutasi pagi jam 07:30"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onclick="closeOpeningBalanceModal()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                    Nanti Saja
+                </button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Buka Loket & Simpan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -534,6 +687,14 @@
             return true;
         }
 
+        const hasOpening = {{ $hasOpeningBalance ? 'true' : 'false' }};
+        if (!hasOpening) {
+            alert('Loket kasir belum dibuka untuk hari ini! Silakan masukkan saldo awal terlebih dahulu.');
+            openOpeningBalanceModal();
+            event.preventDefault();
+            return false;
+        }
+
         const selectedOption = typeSelect.options[typeSelect.selectedIndex];
         const isMaterai = checkIsMaterai(selectedOption);
         const isSpp = checkIsSpp(selectedOption);
@@ -605,6 +766,40 @@
         }
         return false;
     }
+
+    // Helper fungsi untuk modal pembukaan loket & saldo awal
+    window.openOpeningBalanceModal = function() {
+        const modal = document.getElementById('openingBalanceModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const input = document.getElementById('opening_bni_balance');
+            if (input) setTimeout(() => input.focus(), 100);
+        }
+    };
+
+    window.closeOpeningBalanceModal = function() {
+        const modal = document.getElementById('openingBalanceModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    };
+
+    @if(! $hasOpeningBalance)
+    document.addEventListener('DOMContentLoaded', function() {
+        openOpeningBalanceModal();
+    });
+    @endif
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const openingModal = document.getElementById('openingBalanceModal');
+        if (openingModal) {
+            openingModal.addEventListener('click', function(e) {
+                if (e.target === openingModal) {
+                    closeOpeningBalanceModal();
+                }
+            });
+        }
+    });
 
     // Helper fungsi untuk submit modal verifikasi
     window.submitWithDefault = function(val) {
