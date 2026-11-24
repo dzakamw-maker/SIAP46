@@ -46,5 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/opening-balance', [CashierController::class, 'storeOpeningBalance'])->name('kasir.opening-balance.store');
         Route::get('/eod', [CashierController::class, 'eod'])->name('kasir.eod');
         Route::post('/eod', [CashierController::class, 'storeEod'])->name('kasir.eod.store');
+        Route::get('/password', [CashierController::class, 'showPasswordForm'])->name('kasir.password');
+        Route::put('/password', [CashierController::class, 'updatePassword'])->name('kasir.password.update');
     });
 });

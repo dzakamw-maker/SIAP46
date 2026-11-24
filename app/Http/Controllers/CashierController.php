@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -485,6 +486,32 @@ class CashierController extends Controller
         );
 
         return redirect()->route('kasir.eod')->with('success', 'Laporan Rekap Harian (EOD) berhasil dikirim dan tersimpan! Menunggu verifikasi dari Guru Pembimbing.');
+    }
+
+    public function showPasswordForm(): View
+    {
+        $user = auth()->user();
+
+        return view('cashier.password', compact('user'));
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password baru minimal harus 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $user->update([
+            'password' => $validated['password'],
+        ]);
+
+        return redirect()->route('kasir.password')->with('success', 'Password akun Anda berhasil diperbarui!');
     }
 
     /**
