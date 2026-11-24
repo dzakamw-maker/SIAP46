@@ -407,4 +407,91 @@ class UserManagementTest extends TestCase
         $responseEmpty->assertDontSee('Budi Sudarsono');
         $responseEmpty->assertDontSee('Siti Nurhaliza');
     }
+
+    public function test_admin_can_delete_all_cashiers_while_preserving_admin_users(): void
+    {
+        $adminRole = Role::create(['name' => 'Admin']);
+        $kasirRole = Role::create(['name' => 'Kasir']);
+
+        $admin = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Utama',
+            'username' => 'admin_utama',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $admin2 = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Kedua',
+            'username' => 'admin_kedua',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        for ($i = 1; $i <= 3; $i++) {
+            User::create([
+                'role_id' => $kasirRole->id,
+                'full_name' => "Kasir Siswa {$i}",
+                'username' => "kasir_{$i}",
+                'student_number' => "1000{$i}",
+                'class_group' => 'XI RPL 1',
+                'password' => 'secret123',
+                'is_active' => true,
+            ]);
+        }
+
+        $this->assertEquals(3, User::where('role_id', $kasirRole->id)->count());
+        $this->assertEquals(2, User::where('role_id', $adminRole->id)->count());
+
+        $response = $this->actingAs($admin)->delete(route('admin.users.delete-all-cashiers'));
+
+        $response->assertRedirect(route('admin.users'));
+        $response->assertSessionHas('success');
+
+        // Seluruh kasir terhapus
+        $this->assertEquals(0, User::where('role_id', $kasirRole->id)->count());
+
+        // Akun Admin tetap aman
+        $this->assertEquals(2, User::where('role_id', $adminRole->id)->count());
+        $this->assertDatabaseHas('users', ['username' => 'admin_utama']);
+        $this->assertDatabaseHas('users', ['username' => 'admin_kedua']);
+    }
+
+    public function test_delete_all_cashiers_returns_error_when_no_cashiers_exist(): void
+    {
+        $adminRole = Role::create(['name' => 'Admin']);
+        Role::create(['name' => 'Kasir']);
+
+        $admin = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Utama',
+            'username' => 'admin_utama',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->delete(route('admin.users.delete-all-cashiers'));
+
+        $response->assertRedirect(route('admin.users'));
+        $response->assertSessionHas('error');
+    }
+
+    public function test_non_admin_cannot_delete_all_cashiers(): void
+    {
+        Role::create(['name' => 'Admin']);
+        $kasirRole = Role::create(['name' => 'Kasir']);
+
+        $kasir = User::create([
+            'role_id' => $kasirRole->id,
+            'full_name' => 'Kasir Siswa',
+            'username' => 'kasir_user',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($kasir)->delete(route('admin.users.delete-all-cashiers'));
+
+        $response->assertStatus(403);
+    }
 }

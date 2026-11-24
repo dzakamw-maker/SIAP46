@@ -8,9 +8,13 @@ use App\Models\StaffAttendance;
 use App\Models\StampDutyRecord;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\SimpleSpreadsheetReader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminController extends Controller
 {
@@ -146,7 +150,9 @@ class AdminController extends Controller
             ->latest('id')
             ->get();
 
-        return view('admin.users', compact('users', 'search', 'selectedRole', 'selectedStatus', 'roles'));
+        $cashierCount = User::whereRelation('role', 'name', 'Kasir')->count();
+
+        return view('admin.users', compact('users', 'search', 'selectedRole', 'selectedStatus', 'roles', 'cashierCount'));
     }
 
     public function createUser(): View
@@ -179,6 +185,377 @@ class AdminController extends Controller
         User::create($validated);
 
         return redirect()->route('admin.users')->with('success', 'User '.$validated['full_name'].' berhasil ditambahkan!');
+    }
+
+    public function downloadUserTemplate(): StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="template_import_siswa_kasir.csv"',
+        ];
+
+        return response()->stream(function () {
+            $handle = fopen('php://output', 'w');
+            // Tulis UTF-8 BOM agar Excel membukanya langsung rapi terpisah kolom
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // Header kolom
+            fputcsv($handle, ['Nama Siswa', 'NIS', 'Kelas', 'Username', 'Password'], ',');
+
+            // Contoh data
+            fputcsv($handle, ['Agus Setiawan', '123456789', 'XI RPL 1', 'agus.setiawan', 'password'], ',');
+            fputcsv($handle, ['Budi Santoso', '123456790', 'XI RPL 1', 'budi.santoso', 'password'], ',');
+            fputcsv($handle, ['Dewi Lestari', '123456791', 'XI RPL 2', 'dewi.lestari', 'password'], ',');
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function importUsers(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:5120'],
+            'default_password' => ['nullable', 'string', 'min:6'],
+        ], [
+            'file.required' => 'File spreadsheet (Excel / CSV) wajib dipilih.',
+            'file.mimes' => 'Format file harus berupa Excel (.xlsx) atau .csv.',
+            'file.max' => 'Ukuran file maksimal adalah 5MB.',
+            'default_password.min' => 'Password default minimal harus 6 karakter.',
+        ]);
+
+        $file = $request->file('file');
+        $rows = SimpleSpreadsheetReader::read($file->getRealPath(), $file->getClientOriginalExtension());
+
+        if (empty($rows)) {
+            return back()->with('error', 'File Excel kosong atau tidak dapat dibaca.');
+        }
+
+        $kasirRole = Role::firstOrCreate(
+            ['name' => 'Kasir'],
+            ['description' => 'Siswa / Kasir BNI']
+        );
+
+        $defaultPassword = $request->filled('default_password')
+            ? (string) $request->input('default_password')
+            : 'password';
+
+        // Pre-hash password default sekali agar proses massal tidak terbebani ratusan putaran Bcrypt CPU
+        $hashedDefaultPassword = Hash::make($defaultPassword);
+
+        $corruptedTokens = ['#ref!', '#n/a', '#value!', '#name?', 'nan', '-', 'null', 'undefined', 'belum', 'sudah', 'abstain'];
+
+        $exactSkipKeywords = [
+            'nama', 'nama siswa', 'nama lengkap', 'nis', 'nisn', 'no', 'nomor',
+            'no.', 'no urut', 'nomor urut', 'l/p', 'jk', 'jenis kelamin',
+        ];
+
+        $prefixSkipKeywords = [
+            'mengetahui', 'wali kelas', 'guru', 'wakasek', 'kurikulum', 'kepala sekolah', 'rekapitulasi',
+            'keterangan', 'daftar hadir', 'tahun pelajaran', 'tahun ajaran', 'bulan',
+            'jumlah', 'total', 'catatan', 'gaya belajar',
+        ];
+
+        $detectHeaderMap = function (array $row): ?array {
+            $map = [
+                'name' => null,
+                'nis' => null,
+                'class' => null,
+                'jurusan' => null,
+                'grade' => null,
+                'username' => null,
+                'password' => null,
+            ];
+            $hasExplicitNis = false;
+
+            foreach ($row as $idx => $cell) {
+                $norm = strtolower(trim((string) $cell));
+                if ($norm === '') {
+                    continue;
+                }
+
+                if (in_array($norm, ['nama', 'nama siswa', 'nama lengkap', 'full_name', 'name', 'student_name', 'nama peserta didik'], true)) {
+                    $map['name'] = $idx;
+                } elseif (in_array($norm, ['nis', 'no induk', 'nomor induk', 'nipd', 'nis/nisn'], true)) {
+                    $map['nis'] = $idx;
+                    $hasExplicitNis = true;
+                } elseif (! $hasExplicitNis && in_array($norm, ['nisn', 'student_number', 'no_induk'], true)) {
+                    $map['nis'] = $idx;
+                } elseif (in_array($norm, ['rombel reguler', 'rombel', 'class_group', 'kelas / rombel', 'rombongan belajar'], true)) {
+                    $map['class'] = $idx;
+                } elseif (in_array($norm, ['kelas', 'tingkat', 'class'], true)) {
+                    $map['grade'] = $idx;
+                    if ($map['class'] === null) {
+                        $map['class'] = $idx;
+                    }
+                } elseif (in_array($norm, ['program keahlian', 'kompetensi keahlian', 'jurusan'], true)) {
+                    $map['jurusan'] = $idx;
+                } elseif (in_array($norm, ['username', 'user', 'id login', 'id_login'], true)) {
+                    $map['username'] = $idx;
+                } elseif (in_array($norm, ['password', 'pass', 'kata sandi', 'kata_sandi'], true)) {
+                    $map['password'] = $idx;
+                }
+            }
+
+            if ($map['name'] !== null || $map['nis'] !== null) {
+                if ($map['name'] === null && $map['nis'] === 1 && isset($row[2])) {
+                    $map['name'] = 2;
+                }
+                if ($map['nis'] === null && $map['name'] === 2 && isset($row[1])) {
+                    $map['nis'] = 1;
+                }
+
+                return $map;
+            }
+
+            return null;
+        };
+
+        // Deteksi letak baris header awal (scan hingga 15 baris pertama)
+        $headerRowIndex = null;
+        $colMap = [
+            'name' => null,
+            'nis' => null,
+            'class' => null,
+            'jurusan' => null,
+            'grade' => null,
+            'username' => null,
+            'password' => null,
+        ];
+        $detectedClassFromTitle = null;
+
+        $maxScan = min(15, count($rows));
+        for ($r = 0; $r < $maxScan; $r++) {
+            $parsedMap = $detectHeaderMap($rows[$r]);
+            if ($parsedMap !== null && ($parsedMap['name'] !== null || $parsedMap['nis'] !== null)) {
+                $headerRowIndex = $r;
+                $colMap = $parsedMap;
+                break;
+            }
+
+            $rowCombinedText = implode(' ', $rows[$r]);
+            if ($detectedClassFromTitle === null && preg_match('/(?:rombel|kelas)\s*[:\s-]?\s*([A-Za-z0-9\-\.\/]+(?:\s+(?!tahun|semester|tp|ta)[A-Za-z0-9\-\.\/]+)*)/i', $rowCombinedText, $m)) {
+                $cand = trim($m[1]);
+                if (! in_array(strtolower($cand), ['campuran', 'mpls', 'matrikulasi', '#ref!', 'nan'], true)) {
+                    $detectedClassFromTitle = $cand;
+                }
+            }
+        }
+
+        if ($headerRowIndex !== null) {
+            $startIndex = $headerRowIndex + 1;
+        } else {
+            $startIndex = 0;
+            $firstRow = $rows[0];
+            $isCol0Numeric = isset($firstRow[0]) && is_numeric(trim($firstRow[0]));
+            $isCol1Numeric = isset($firstRow[1]) && is_numeric(trim($firstRow[1]));
+
+            if ($isCol0Numeric && $isCol1Numeric && isset($firstRow[2])) {
+                $colMap = [
+                    'name' => 2,
+                    'nis' => 1,
+                    'class' => 3,
+                    'jurusan' => null,
+                    'grade' => null,
+                    'username' => null,
+                    'password' => null,
+                ];
+            } else {
+                $colMap = [
+                    'name' => 0,
+                    'nis' => 1,
+                    'class' => 2,
+                    'jurusan' => null,
+                    'grade' => null,
+                    'username' => 3,
+                    'password' => 4,
+                ];
+            }
+        }
+
+        $createdCount = 0;
+        $updatedCount = 0;
+        $skippedCount = 0;
+
+        DB::transaction(function () use (
+            $rows,
+            $startIndex,
+            $colMap,
+            $detectedClassFromTitle,
+            $detectHeaderMap,
+            $corruptedTokens,
+            $hashedDefaultPassword,
+            $kasirRole,
+            $exactSkipKeywords,
+            $prefixSkipKeywords,
+            &$createdCount,
+            &$updatedCount,
+            &$skippedCount
+        ) {
+            $totalRows = count($rows);
+            $activeClassTitle = $detectedClassFromTitle;
+
+            for ($i = $startIndex; $i < $totalRows; $i++) {
+                $row = $rows[$i];
+
+                // 1. Cek apakah baris ini merupakan header tabel baru (skenario multi-table dalam 1 file)
+                $dynamicMap = $detectHeaderMap($row);
+                if ($dynamicMap !== null && ($dynamicMap['name'] !== null || $dynamicMap['nis'] !== null)) {
+                    $colMap = $dynamicMap;
+
+                    continue;
+                }
+
+                // 2. Cek apakah ada penanda kelas/rombel baru pada judul tabel
+                $rowCombinedText = implode(' ', $row);
+                if (preg_match('/(?:rombel|kelas)\s*[:\s-]?\s*([A-Za-z0-9\-\.\/]+(?:\s+(?!tahun|semester|tp|ta)[A-Za-z0-9\-\.\/]+)*)/i', $rowCombinedText, $m)) {
+                    $cand = trim($m[1]);
+                    if (! in_array(strtolower($cand), ['campuran', 'mpls', 'matrikulasi', '#ref!', 'nan'], true)) {
+                        $activeClassTitle = $cand;
+                    }
+                }
+
+                // 3. Ekstrak dan sanitasi Nama Lengkap
+                $fullName = isset($colMap['name'], $row[$colMap['name']]) ? trim((string) $row[$colMap['name']]) : '';
+
+                if ($fullName === '' || is_numeric($fullName)) {
+                    continue;
+                }
+
+                $lowerName = strtolower($fullName);
+
+                // Abaikan jika cell berisi token formula rusak Excel (#REF!, NaN, dst)
+                if (in_array($lowerName, $corruptedTokens, true)) {
+                    continue;
+                }
+
+                // Abaikan jika cell ternyata berisi jenis kelamin (L/P/Laki-Laki/Perempuan)
+                if (in_array($lowerName, ['l', 'p', 'laki-laki', 'perempuan', 'pria', 'wanita'], true)) {
+                    if (isset($row[2]) && ! in_array(strtolower(trim($row[2])), ['l', 'p', 'laki-laki', 'perempuan'], true) && ! is_numeric(trim($row[2]))) {
+                        $fullName = trim((string) $row[2]);
+                        $lowerName = strtolower($fullName);
+                    } else {
+                        continue;
+                    }
+                }
+
+                if (in_array($lowerName, $exactSkipKeywords, true)) {
+                    continue;
+                }
+
+                $isHeaderOrSummary = false;
+                foreach ($prefixSkipKeywords as $prefix) {
+                    if (str_starts_with($lowerName, $prefix)) {
+                        $isHeaderOrSummary = true;
+                        break;
+                    }
+                }
+                if ($isHeaderOrSummary) {
+                    continue;
+                }
+
+                // Abaikan jika baris nama guru / kepsek / wakasek di tanda tangan
+                if (preg_match('/^(?:nunuk mujiana|irma rohima|siti syarifah|zulfa tri astuti|komalasari|wakasek|guru mata pelajaran)/i', $lowerName)) {
+                    continue;
+                }
+
+                // 4. Ekstrak dan sanitasi NIS
+                $nis = isset($colMap['nis'], $row[$colMap['nis']]) ? trim((string) $row[$colMap['nis']]) : null;
+                if ($nis !== null) {
+                    $lowerNis = strtolower($nis);
+                    if (in_array($lowerNis, $corruptedTokens, true) || ! is_numeric(preg_replace('/[^0-9]/', '', $nis))) {
+                        $nis = null;
+                    }
+                }
+
+                // 5. Ekstrak dan sanitasi Kelas / Rombel
+                $class = isset($colMap['class'], $row[$colMap['class']]) ? trim((string) $row[$colMap['class']]) : null;
+                if ($class !== null && in_array(strtolower($class), $corruptedTokens, true)) {
+                    $class = null;
+                }
+
+                // Jika kolom rombel bernilai kosong / #REF!, coba bentuk dari kelas (tingkat) + program keahlian jika ada
+                if ($class === null || $class === '') {
+                    $grade = isset($colMap['grade'], $row[$colMap['grade']]) ? trim((string) $row[$colMap['grade']]) : '';
+                    $jurusan = isset($colMap['jurusan'], $row[$colMap['jurusan']]) ? trim((string) $row[$colMap['jurusan']]) : '';
+                    if ($grade !== '' && ! in_array(strtolower($grade), $corruptedTokens, true)) {
+                        $class = $grade.($jurusan !== '' && ! in_array(strtolower($jurusan), $corruptedTokens, true) ? ' '.$jurusan : '');
+                    } elseif ($jurusan !== '' && ! in_array(strtolower($jurusan), $corruptedTokens, true)) {
+                        $class = $jurusan;
+                    }
+                }
+
+                if (($class === null || $class === '') && $activeClassTitle !== null) {
+                    $class = $activeClassTitle;
+                }
+
+                $userSpecified = isset($colMap['username'], $row[$colMap['username']]) ? trim((string) $row[$colMap['username']]) : '';
+                $passSpecified = isset($colMap['password'], $row[$colMap['password']]) ? trim((string) $row[$colMap['password']]) : '';
+
+                $username = $userSpecified;
+                if ($username === '') {
+                    if ($nis !== null && $nis !== '') {
+                        $username = $nis;
+                    } else {
+                        $username = strtolower((string) preg_replace('/[^a-zA-Z0-9]/', '', $fullName));
+                    }
+                }
+
+                if ($username === '') {
+                    $skippedCount++;
+
+                    continue;
+                }
+
+                $passwordToUse = $passSpecified !== '' ? $passSpecified : $hashedDefaultPassword;
+
+                $existing = User::where('username', $username)->first();
+                if ($existing) {
+                    $updateData = [
+                        'full_name' => $fullName,
+                        'role_id' => $kasirRole->id,
+                        'is_active' => true,
+                    ];
+                    if ($nis !== null && $nis !== '') {
+                        $updateData['student_number'] = $nis;
+                    }
+                    if ($class !== null && $class !== '') {
+                        $updateData['class_group'] = $class;
+                    }
+                    if ($passSpecified !== '') {
+                        $updateData['password'] = $passSpecified;
+                    }
+                    $existing->update($updateData);
+                    $updatedCount++;
+                } else {
+                    User::create([
+                        'full_name' => $fullName,
+                        'username' => $username,
+                        'student_number' => $nis,
+                        'class_group' => $class,
+                        'password' => $passwordToUse,
+                        'role_id' => $kasirRole->id,
+                        'is_active' => true,
+                    ]);
+                    $createdCount++;
+                }
+            }
+        });
+
+        $totalProcessed = $createdCount + $updatedCount;
+        if ($totalProcessed === 0) {
+            return back()->with('error', 'Tidak ada data siswa yang valid untuk diimpor.');
+        }
+
+        $message = "Import berhasil! {$createdCount} siswa baru berhasil ditambahkan sebagai Kasir";
+        if ($updatedCount > 0) {
+            $message .= ", {$updatedCount} data siswa diperbarui";
+        }
+        if ($skippedCount > 0) {
+            $message .= ", {$skippedCount} baris dilewati";
+        }
+        $message .= '.';
+
+        return redirect()->route('admin.users')->with('success', $message);
     }
 
     public function editUser(User $user): View
@@ -271,6 +648,35 @@ class AdminController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users')->with('success', 'User '.$fullName.' berhasil dihapus secara permanen.');
+    }
+
+    public function deleteAllCashiers(): RedirectResponse
+    {
+        $kasirRole = Role::where('name', 'Kasir')->first();
+        if (! $kasirRole) {
+            return redirect()->route('admin.users')->with('error', 'Role Kasir tidak ditemukan di sistem.');
+        }
+
+        $cashiersQuery = User::where('role_id', $kasirRole->id)->where('id', '!=', auth()->id());
+        $count = $cashiersQuery->count();
+
+        if ($count === 0) {
+            return redirect()->route('admin.users')->with('error', 'Tidak ada data user dengan role Kasir untuk dihapus.');
+        }
+
+        DB::transaction(function () use ($cashiersQuery) {
+            $cashierIds = $cashiersQuery->pluck('id');
+
+            StaffAttendance::whereIn('user_id', $cashierIds)->delete();
+            Transaction::whereIn('cashier_id', $cashierIds)->delete();
+            StampDutyRecord::whereIn('cashier_id', $cashierIds)->update(['cashier_id' => null]);
+            DailyRecap::whereIn('recorded_by', $cashierIds)->update(['recorded_by' => null]);
+            DailyRecap::whereIn('verified_by', $cashierIds)->update(['verified_by' => null]);
+
+            User::whereIn('id', $cashierIds)->delete();
+        });
+
+        return redirect()->route('admin.users')->with('success', "Berhasil menghapus seluruh user dengan role Kasir ({$count} user) secara permanen.");
     }
 
     public function eod()
