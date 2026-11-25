@@ -50,6 +50,7 @@
                 <div class="mb-4">
                     <label for="amount" class="block mb-2 text-sm font-medium text-gray-700">Total Harga Beli (Rp)</label>
                     <input type="number" id="amount" name="amount" value="{{ old('amount') }}" min="0" step="any" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5" placeholder="Contoh: 500000">
+                    <span class="text-xs text-gray-400 mt-1 block">Acuan harga modal saat ini: Rp {{ number_format($stampCostPrice ?? 10000, 0, ',', '.') }} / pcs</span>
                 </div>
                 <div class="mb-6">
                     <label for="notes" class="block mb-2 text-sm font-medium text-gray-700">Catatan Tambahan (Opsional)</label>

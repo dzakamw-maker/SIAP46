@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Customer;
 use App\Models\DailyRecap;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\Transaction;
 use App\Models\TransactionType;
 use App\Models\User;
@@ -87,14 +88,23 @@ class CashierOpeningBalanceAndEodTest extends TestCase
             'opening_cash_balance' => 1000000,
         ]);
 
-        // Kasir 2 masuk ke dashboard: tidak ditanya saldo awal lagi, banner aktif terlihat
+        // Kasir 2 masuk ke dashboard: tidak ditanya saldo awal lagi, banner aktif terlihat, namun wajib isi presensi pribadi dahulu
         $response = $this->actingAs($cashier2)->get(route('kasir.dashboard'));
         $response->assertStatus(200);
         $response->assertSee('Loket Hari Ini Aktif');
         $response->assertSee('Kasir Pertama');
         $response->assertSee('7.500.000');
-        $response->assertSee('Proses Transaksi');
+        $response->assertSee('Isi Presensi Dahulu');
         $response->assertDontSee('Buka Loket Dahulu');
+
+        // Setelah Kasir 2 mencatat presensi shift, tombol Proses Transaksi tersedia
+        $this->actingAs($cashier2)->post(route('kasir.attendance.store'), [
+            'student_note' => 'Shift siang siap bertugas',
+        ])->assertRedirect(route('kasir.dashboard'));
+
+        $afterAttendance = $this->actingAs($cashier2)->get(route('kasir.dashboard'));
+        $afterAttendance->assertStatus(200);
+        $afterAttendance->assertSee('Proses Transaksi');
     }
 
     public function test_transaction_calculates_and_updates_running_bni_balance(): void
@@ -200,5 +210,26 @@ class CashierOpeningBalanceAndEodTest extends TestCase
         $this->assertTrue($recap->is_closed);
         $this->assertEquals($cashier->id, $recap->recorded_by);
         $this->assertEquals('Rekap harian klop, selisih 0', $recap->notes);
+    }
+
+    public function test_eod_valuates_remaining_stamps_using_configured_cost_price(): void
+    {
+        $cashier = $this->createCashierUser();
+        Setting::setValue(Setting::STAMP_COST_PRICE, 9500);
+
+        $this->actingAs($cashier)->post(route('kasir.opening-balance.store'), [
+            'opening_bni_balance' => 1000000,
+            'opening_cash_balance' => 100000,
+        ]);
+
+        $this->actingAs($cashier)->post(route('kasir.eod.store'), [
+            'actual_bni_balance' => 1000000,
+            'actual_cash_amount' => 100000,
+            'actual_stamp_count' => 10,
+        ])->assertRedirect(route('kasir.eod'));
+
+        $recap = DailyRecap::whereDate('recap_date', today())->first();
+        // 1.000.000 + 100.000 + (10 * 9.500) = 1.195.000
+        $this->assertEquals(1195000, (float) $recap->total);
     }
 }

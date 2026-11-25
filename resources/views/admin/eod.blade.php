@@ -14,6 +14,33 @@
 </div>
 @endif
 
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+    <div class="p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+                <h3 class="text-base font-semibold text-gray-800">Pengaturan Harga Materai</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Atur harga jual standar di loket kasir dan harga beli (modal) untuk valuasi aset EOD.</p>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('admin.settings.stamp-prices') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            @csrf
+            <div>
+                <label for="stamp_selling_price" class="block text-xs font-medium text-gray-700 mb-1">Harga Jual Materai (Rp / pcs)</label>
+                <input type="number" name="stamp_selling_price" id="stamp_selling_price" min="0" step="1" required value="{{ old('stamp_selling_price', $stampSellingPrice) }}" class="w-full text-sm rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2.5 border font-mono">
+            </div>
+            <div>
+                <label for="stamp_cost_price" class="block text-xs font-medium text-gray-700 mb-1">Harga Beli / Modal (Rp / pcs)</label>
+                <input type="number" name="stamp_cost_price" id="stamp_cost_price" min="0" step="1" required value="{{ old('stamp_cost_price', $stampCostPrice) }}" class="w-full text-sm rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2.5 border font-mono">
+            </div>
+            <div>
+                <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors cursor-pointer">
+                    Simpan Harga Materai
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="p-6">
         <div class="mb-5">

@@ -306,7 +306,7 @@
                     <span class="bg-[#005e6a] px-3 py-1 rounded-full border border-white/20 text-white font-semibold">Setor Tunai BNI (Rp 2.500)</span>
                     <span class="bg-[#005e6a]/70 px-3 py-1 rounded-full border border-white/10 text-slate-200">Top Up DANA (Rp 2.000)</span>
                     <span class="bg-[#005e6a]/70 px-3 py-1 rounded-full border border-white/10 text-slate-200">Token PLN (Rp 3.000)</span>
-                    <span class="bg-[#005e6a]/70 px-3 py-1 rounded-full border border-white/10 text-slate-200">Materai 10rb (Rp 10.000)</span>
+                    <span class="bg-[#005e6a]/70 px-3 py-1 rounded-full border border-white/10 text-slate-200">Materai (Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }})</span>
                 </div>
             </div>
         </div>
@@ -471,7 +471,7 @@
 
                 <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
                     <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">6</div>
-                    <h4 class="font-bold text-slate-900 text-lg">Bea Meterai Rp 10.000</h4>
+                    <h4 class="font-bold text-slate-900 text-lg">Bea Meterai Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</h4>
                     <p class="text-xs text-slate-600 leading-relaxed">Penyediaan materai fisik resmi untuk kelengkapan berkas PKL / magang siswa dan dokumen administrasi.</p>
                 </div>
 
@@ -548,14 +548,14 @@
                         <h4 class="text-xl font-bold text-slate-900">Tagihan & Materai</h4>
                         <div class="flex items-baseline gap-1">
                             <span class="text-3xl font-black text-slate-900">Rp 2.500</span>
-                            <span class="text-xs text-slate-500">+ Materai 10rb</span>
+                            <span class="text-xs text-slate-500">+ Materai {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</span>
                         </div>
                         <p class="text-xs text-slate-600 leading-relaxed">Pembayaran tagihan listrik PLN, BPJS, PDAM, dan pembelian materai.</p>
                         
                         <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600">
                             <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Token PLN & Pasca Bayar</div>
                             <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Iuran BPJS Kesehatan</div>
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Materai Resmi Rp 10.000</div>
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Materai Resmi Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</div>
                         </div>
                     </div>
                     <a href="#simulasi" class="w-full py-3 rounded-full text-center text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">
@@ -590,7 +590,7 @@
                                 <option value="topup_ewallet" data-fee="2000" data-note="Tersedia untuk DANA, ShopeePay, GoPay, dan OVO. Cukup berikan nomor HP akun.">Top Up E-Wallet (DANA / ShopeePay / GoPay)</option>
                                 <option value="pln_token" data-fee="3000" data-note="Sebutkan ID Pelanggan PLN. 20 digit kode token langsung terbit di struk.">Token Listrik PLN (Prepaid)</option>
                                 <option value="bpjs" data-fee="2500" data-note="Pembayaran iuran BPJS Kesehatan per bulan. Bawa Nomor Kartu BPJS.">Iuran BPJS Kesehatan</option>
-                                <option value="materai" data-fee="0" data-price="10000" data-note="Harga materai resmi Rp 10.000 / keping tanpa biaya tambahan.">Materai Resmi Rp 10.000</option>
+                                <option value="materai" data-fee="0" data-price="{{ $stampSellingPrice ?? 11000 }}" data-note="Harga materai di loket Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }} / keping.">Materai Resmi Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</option>
                                 <option value="pulsa" data-fee="1500" data-note="Tersedia semua operator (Telkomsel, Indosat, XL, Tri, Smartfren).">Pulsa Seluler Semua Operator</option>
                             </select>
                         </div>

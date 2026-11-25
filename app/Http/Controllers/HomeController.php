@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 
 class HomeController extends Controller
@@ -23,6 +24,8 @@ class HomeController extends Controller
             return $cashierController->dashboard();
         }
 
-        return view('home');
+        $stampSellingPrice = Setting::getInt(Setting::STAMP_SELLING_PRICE, 11000);
+
+        return view('home', compact('stampSellingPrice'));
     }
 }

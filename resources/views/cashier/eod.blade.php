@@ -88,7 +88,7 @@
                     <div>
                         <label for="actual_stamp_count" class="block mb-2 text-sm font-medium text-gray-700">Sisa Materai Fisik (pcs) <span class="text-red-500">*</span></label>
                         <input type="number" min="0" name="actual_stamp_count" id="actual_stamp_count" required value="{{ old('actual_stamp_count', $recap?->stamp_remaining_value ?? $stampsStock) }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono font-medium" placeholder="Hitung jumlah lembar materai">
-                        <span class="text-xs text-gray-400 mt-1 block">Sisa stok materai sistem: {{ $stampsStock }} pcs</span>
+                        <span class="text-xs text-gray-400 mt-1 block">Sisa stok sistem: {{ $stampsStock }} pcs (valuasi modal @ Rp {{ number_format($stampCostPrice ?? 10000, 0, ',', '.') }}/pcs)</span>
                     </div>
                 </div>
 
