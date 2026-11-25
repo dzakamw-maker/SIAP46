@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyRecap;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\StaffAttendance;
 use App\Models\StampDutyRecord;
 use App\Models\Transaction;
@@ -12,7 +13,6 @@ use App\Services\SimpleSpreadsheetReader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -64,64 +64,150 @@ class AdminController extends Controller
 
     public function destroyTransaction(Transaction $transaction): RedirectResponse
     {
-        $isMaterai = $transaction->transactionType && (
-            str_contains(strtolower($transaction->transactionType->code), 'materai') ||
-            str_contains(strtolower($transaction->transactionType->code), 'mtr') ||
-            str_contains(strtolower($transaction->transactionType->name), 'materai')
-        );
-
-        if ($isMaterai) {
-            $relatedStamp = StampDutyRecord::whereDate('record_date', $transaction->transaction_date)
-                ->where('quantity_sold', '>', 0)
-                ->where('notes', 'like', '%Transaksi #'.$transaction->transaction_number.'%')
-                ->latest('id')
-                ->first();
-
-            $quantityToRestore = $relatedStamp ? (int) $relatedStamp->quantity_sold : 0;
-            if ($quantityToRestore <= 0) {
-                $quantityToRestore = (int) max(1, round($transaction->amount / 11000));
-            }
-
-            if ($relatedStamp) {
-                // Perbarui sisa stok pada record-record setelah record penjualan ini jika ada
-                StampDutyRecord::where('id', '>', $relatedStamp->id)
-                    ->increment('remaining_stock', $quantityToRestore);
-
-                // Hapus catatan penjualan materai yang terkait
-                $relatedStamp->delete();
-            } else {
-                // Fallback jika record penjualan lama tidak ditemukan
-                $latestStamp = StampDutyRecord::latest('id')->first();
-                $currentStock = $latestStamp ? (int) $latestStamp->remaining_stock : 0;
-                StampDutyRecord::create([
-                    'record_date' => today(),
-                    'quantity_sold' => 0,
-                    'quantity_purchased' => 0,
-                    'remaining_stock' => $currentStock + $quantityToRestore,
-                    'amount' => 0,
-                    'cashier_id' => auth()->id(),
-                    'notes' => "Pengembalian Stok (Pembatalan Transaksi #{$transaction->transaction_number} - {$quantityToRestore} pcs)",
-                ]);
-            }
-        }
-
-        $customer = $transaction->customer;
         $trxNumber = $transaction->transaction_number;
-        $transaction->delete();
 
-        if ($customer && $customer->transactions()->count() === 0) {
-            $customer->delete();
-        }
+        DB::transaction(function () use ($transaction) {
+            $txDate = $transaction->transaction_date;
+            $recap = DailyRecap::whereDate('recap_date', $txDate)->first();
+
+            // Tentukan saldo awal hari sebelum transaksi pertama untuk rekalkulasi rantai BNI
+            $startingBalance = null;
+            if ($recap && $recap->opening_bni_balance !== null) {
+                $startingBalance = (float) $recap->opening_bni_balance;
+            } else {
+                $firstTrackedTx = Transaction::with('transactionType')
+                    ->whereDate('transaction_date', $txDate)
+                    ->whereNotNull('bni_balance_after')
+                    ->orderBy('id')
+                    ->first();
+
+                if ($firstTrackedTx) {
+                    $firstCode = strtolower($firstTrackedTx->transactionType?->code ?? '');
+                    $firstName = strtolower($firstTrackedTx->transactionType?->name ?? '');
+                    $firstIsMaterai = str_contains($firstCode, 'materai') || str_contains($firstCode, 'mtr') || str_contains($firstName, 'materai');
+                    $firstIsTarik = str_contains($firstCode, 'tarik') || str_contains($firstName, 'tarik');
+
+                    if ($firstIsMaterai) {
+                        $startingBalance = (float) $firstTrackedTx->bni_balance_after;
+                    } elseif ($firstIsTarik) {
+                        $startingBalance = (float) $firstTrackedTx->bni_balance_after - (float) $firstTrackedTx->amount;
+                    } else {
+                        $startingBalance = (float) $firstTrackedTx->bni_balance_after + (float) $firstTrackedTx->amount;
+                    }
+                }
+            }
+
+            $isMaterai = $transaction->transactionType && (
+                str_contains(strtolower($transaction->transactionType->code), 'materai') ||
+                str_contains(strtolower($transaction->transactionType->code), 'mtr') ||
+                str_contains(strtolower($transaction->transactionType->name), 'materai')
+            );
+
+            if ($isMaterai) {
+                $relatedStamp = StampDutyRecord::whereDate('record_date', $txDate)
+                    ->where('quantity_sold', '>', 0)
+                    ->where('notes', 'like', '%(Transaksi #'.$transaction->transaction_number.')%')
+                    ->latest('id')
+                    ->first();
+
+                $defaultSellPrice = max(1, Setting::getInt(Setting::STAMP_SELLING_PRICE, 11000));
+                $quantityToRestore = $relatedStamp ? (int) $relatedStamp->quantity_sold : 0;
+                if ($quantityToRestore <= 0) {
+                    $quantityToRestore = (int) max(1, round($transaction->amount / $defaultSellPrice));
+                }
+
+                if ($relatedStamp) {
+                    // Perbarui sisa stok pada record-record setelah record penjualan ini jika ada
+                    StampDutyRecord::where('id', '>', $relatedStamp->id)
+                        ->increment('remaining_stock', $quantityToRestore);
+
+                    // Hapus catatan penjualan materai yang terkait
+                    $relatedStamp->delete();
+                } else {
+                    // Fallback jika record penjualan lama tidak ditemukan
+                    $latestStamp = StampDutyRecord::latest('id')->first();
+                    $currentStock = $latestStamp ? (int) $latestStamp->remaining_stock : 0;
+                    StampDutyRecord::create([
+                        'record_date' => today(),
+                        'quantity_sold' => 0,
+                        'quantity_purchased' => 0,
+                        'remaining_stock' => $currentStock + $quantityToRestore,
+                        'amount' => 0,
+                        'cashier_id' => auth()->id(),
+                        'notes' => "Pengembalian Stok (Pembatalan Transaksi #{$transaction->transaction_number} - {$quantityToRestore} pcs)",
+                    ]);
+                }
+            }
+
+            $customer = $transaction->customer;
+            $transaction->delete();
+
+            if ($customer && $customer->transactions()->count() === 0) {
+                $customer->delete();
+            }
+
+            // Rekalkulasi berantai bni_balance_after untuk transaksi tersisa di tanggal yang sama
+            if ($startingBalance !== null) {
+                $runningBalance = $startingBalance;
+                $remainingTxs = Transaction::with('transactionType')
+                    ->whereDate('transaction_date', $txDate)
+                    ->orderBy('id')
+                    ->get();
+
+                foreach ($remainingTxs as $remainingTx) {
+                    if ($remainingTx->bni_balance_after === null && ! ($recap && $recap->opening_bni_balance !== null)) {
+                        continue;
+                    }
+
+                    $typeCode = strtolower($remainingTx->transactionType?->code ?? '');
+                    $typeName = strtolower($remainingTx->transactionType?->name ?? '');
+                    $txIsMaterai = str_contains($typeCode, 'materai') || str_contains($typeCode, 'mtr') || str_contains($typeName, 'materai');
+                    $txIsTarik = str_contains($typeCode, 'tarik') || str_contains($typeName, 'tarik');
+
+                    if (! $txIsMaterai) {
+                        $runningBalance = $txIsTarik
+                            ? $runningBalance + (float) $remainingTx->amount
+                            : $runningBalance - (float) $remainingTx->amount;
+                    }
+
+                    if ((float) $remainingTx->bni_balance_after !== $runningBalance) {
+                        $remainingTx->update(['bni_balance_after' => $runningBalance]);
+                    }
+                }
+
+                if ($recap) {
+                    $recap->update(['bni_balance_remaining' => $runningBalance]);
+                }
+            }
+        });
 
         return redirect()->route('admin.transactions')
             ->with('success', "Transaksi #{$trxNumber} berhasil dihapus.");
     }
 
-    public function attendance()
+    public function attendance(): View
     {
         $attendances = StaffAttendance::with('user')->latest('attendance_date')->paginate(15);
 
         return view('admin.attendance', compact('attendances'));
+    }
+
+    public function updateAttendance(Request $request, StaffAttendance $attendance): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_note' => ['nullable', 'string', 'max:255'],
+            'teacher_note' => ['nullable', 'string', 'max:255'],
+        ], [
+            'student_note.max' => 'Catatan siswa maksimal 255 karakter.',
+            'teacher_note.max' => 'Catatan guru maksimal 255 karakter.',
+        ]);
+
+        $attendance->update([
+            'student_note' => $validated['student_note'] ?: null,
+            'teacher_note' => $validated['teacher_note'] ?: null,
+        ]);
+
+        return back()->with('success', 'Catatan presensi '.$attendance->user?->full_name.' berhasil diperbarui!');
     }
 
     public function users(Request $request): View
@@ -158,7 +244,8 @@ class AdminController extends Controller
                 END
             ', [auth()->id() ?? 0, $adminRoleId ?? 0, $guruRoleId ?? 0])
             ->latest('id')
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         $cashierCount = User::whereRelation('role', 'name', 'Kasir')->count();
 
@@ -704,11 +791,33 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', "Berhasil menghapus seluruh user dengan role Kasir ({$count} user) secara permanen.");
     }
 
-    public function eod()
+    public function eod(): View
     {
         $recaps = DailyRecap::with(['recordedBy', 'verifiedBy'])->latest('recap_date')->paginate(15);
+        $stampSellingPrice = Setting::getInt(Setting::STAMP_SELLING_PRICE, 11000);
+        $stampCostPrice = Setting::getInt(Setting::STAMP_COST_PRICE, 10000);
 
-        return view('admin.eod', compact('recaps'));
+        return view('admin.eod', compact('recaps', 'stampSellingPrice', 'stampCostPrice'));
+    }
+
+    public function updateStampSettings(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'stamp_selling_price' => ['required', 'numeric', 'min:0'],
+            'stamp_cost_price' => ['required', 'numeric', 'min:0'],
+        ], [
+            'stamp_selling_price.required' => 'Harga jual materai wajib diisi.',
+            'stamp_selling_price.numeric' => 'Harga jual materai harus berupa angka.',
+            'stamp_selling_price.min' => 'Harga jual materai tidak boleh negatif.',
+            'stamp_cost_price.required' => 'Harga beli (modal) materai wajib diisi.',
+            'stamp_cost_price.numeric' => 'Harga beli (modal) materai harus berupa angka.',
+            'stamp_cost_price.min' => 'Harga beli (modal) materai tidak boleh negatif.',
+        ]);
+
+        Setting::setValue(Setting::STAMP_SELLING_PRICE, (int) round((float) $validated['stamp_selling_price']));
+        Setting::setValue(Setting::STAMP_COST_PRICE, (int) round((float) $validated['stamp_cost_price']));
+
+        return back()->with('success', 'Pengaturan harga jual & harga modal materai berhasil diperbarui!');
     }
 
     public function verifyEod(Request $request, DailyRecap $dailyRecap)

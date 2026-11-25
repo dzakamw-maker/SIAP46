@@ -20,8 +20,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/transactions', [AdminController::class, 'transactions'])->name('admin.transactions');
         Route::delete('/transactions/{transaction}', [AdminController::class, 'destroyTransaction'])->name('admin.transactions.destroy');
         Route::get('/attendance', [AdminController::class, 'attendance'])->name('admin.attendance');
+        Route::put('/attendance/{attendance}', [AdminController::class, 'updateAttendance'])->name('admin.attendance.update');
         Route::get('/eod', [AdminController::class, 'eod'])->name('admin.eod');
         Route::post('/eod/{dailyRecap}/verify', [AdminController::class, 'verifyEod'])->name('admin.eod.verify');
+        Route::post('/settings/stamp-prices', [AdminController::class, 'updateStampSettings'])->name('admin.settings.stamp-prices');
         Route::get('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
         Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
         Route::get('/users/template', [AdminController::class, 'downloadUserTemplate'])->name('admin.users.template');
@@ -44,6 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/stamps', [CashierController::class, 'stamps'])->name('kasir.stamps');
         Route::post('/stamps', [CashierController::class, 'storeStamp'])->name('kasir.stamps.store');
         Route::post('/opening-balance', [CashierController::class, 'storeOpeningBalance'])->name('kasir.opening-balance.store');
+        Route::post('/attendance', [CashierController::class, 'storeAttendance'])->name('kasir.attendance.store');
         Route::get('/eod', [CashierController::class, 'eod'])->name('kasir.eod');
         Route::post('/eod', [CashierController::class, 'storeEod'])->name('kasir.eod.store');
         Route::get('/password', [CashierController::class, 'showPasswordForm'])->name('kasir.password');

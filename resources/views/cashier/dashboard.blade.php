@@ -27,11 +27,12 @@
             <li>{{ $error }}</li>
         @endforeach
     </ul>
+</div>
 @endif
 
 @if($hasOpeningBalance)
 <!-- Banner Loket Aktif -->
-<div class="mb-6 p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-200 text-emerald-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+<div class="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-200 text-emerald-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
     <div class="flex items-center gap-3">
         <span class="relative flex h-3 w-3">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -56,7 +57,7 @@
 </div>
 @else
 <!-- Banner Peringatan Loket Belum Dibuka -->
-<div class="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+<div class="mb-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
     <div class="flex items-start gap-3">
         <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -73,6 +74,44 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
         Buka Loket Sekarang
+    </button>
+</div>
+@endif
+
+@if($hasAttendance)
+<!-- Banner Status Presensi Kasir Aktif -->
+<div class="mb-6 p-4 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+    <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+            <span class="font-bold text-teal-800">Presensi Shift Hari Ini Tercatat</span>
+            <p class="text-xs text-teal-700 mt-0.5">
+                Catatan Shift: <strong>{{ $todayAttendance->student_note }}</strong>
+            </p>
+        </div>
+    </div>
+    <button type="button" onclick="openAttendanceModal()" class="inline-flex items-center justify-center px-3.5 py-1.5 bg-white hover:bg-teal-100 text-teal-700 border border-teal-200 text-xs font-semibold rounded-lg shadow-2xs transition-colors whitespace-nowrap cursor-pointer">
+        Ubah Catatan Shift
+    </button>
+</div>
+@else
+<!-- Banner Peringatan Wajib Presensi -->
+<div class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+    <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <div>
+            <span class="font-bold text-blue-800">Presensi Shift Anda Belum Tercatat Hari Ini</span>
+            <p class="text-xs text-blue-700 mt-0.5">
+                Setiap kasir wajib mencatat kehadiran &amp; catatan shift sebelum dapat memproses transaksi.
+            </p>
+        </div>
+    </div>
+    <button type="button" onclick="openAttendanceModal()" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors whitespace-nowrap cursor-pointer">
+        Catat Presensi Sekarang
     </button>
 </div>
 @endif
@@ -185,9 +224,9 @@
                         <div>
                             <label for="stamp_price" class="block mb-2 text-sm font-medium text-gray-700">
                                 <span>Harga Jual per pcs (Rp)</span>
-                                <span class="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded font-medium ml-1">Default Rp 11.000</span>
+                                <span class="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded font-medium ml-1">Default Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</span>
                             </label>
-                            <input type="number" name="stamp_price" id="stamp_price" value="{{ old('stamp_price', 11000) }}" min="0" step="any" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('stamp_price') border-red-500 @enderror" placeholder="11000">
+                            <input type="number" name="stamp_price" id="stamp_price" value="{{ old('stamp_price', $stampSellingPrice ?? 11000) }}" min="0" step="any" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('stamp_price') border-red-500 @enderror" placeholder="{{ $stampSellingPrice ?? 11000 }}">
                             @error('stamp_price')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -221,6 +260,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
                             Buka Loket Dahulu
+                        </button>
+                        @elseif(! $hasAttendance)
+                        <button type="button" onclick="openAttendanceModal()" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Isi Presensi Dahulu
                         </button>
                         @else
                         <button type="submit" class="text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all hover:scale-[1.01]">
@@ -411,6 +457,54 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                     Buka Loket & Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Presensi Shift Kasir -->
+<div id="attendanceModal" class="fixed inset-0 z-50 flex items-center justify-center {{ ($hasOpeningBalance && ! $hasAttendance) ? '' : 'hidden' }} bg-black/50 backdrop-blur-xs transition-opacity p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
+        <div class="px-6 py-5 bg-gradient-to-r from-blue-600 to-teal-600 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">Presensi Shift Kasir</h3>
+                    <p class="text-xs text-blue-100">{{ auth()->user()->full_name }} • {{ now()->translatedFormat('d F Y') }}</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAttendanceModal()" class="text-white/80 hover:text-white rounded-lg p-1.5 hover:bg-white/10 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form action="{{ route('kasir.attendance.store') }}" method="POST" class="p-6">
+            @csrf
+
+            <div class="mb-5">
+                <label for="attendance_student_note" class="block mb-1.5 text-sm font-semibold text-gray-800">
+                    Catatan Kehadiran / Shift <span class="text-red-500">*</span>
+                </label>
+                <textarea name="student_note" id="attendance_student_note" rows="3" maxlength="255" required
+                    placeholder="Contoh: Hadir bertugas shift pagi, kondisi loket dan printer siap."
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ old('student_note', $todayAttendance?->student_note) }}</textarea>
+                <span class="text-[11px] text-gray-400 mt-1 block">Wajib diisi sebelum memproses transaksi pada shift hari ini.</span>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onclick="closeAttendanceModal()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer">
+                    Nanti Saja
+                </button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Simpan Presensi
                 </button>
             </div>
         </form>
@@ -695,6 +789,14 @@
             return false;
         }
 
+        const hasAttendance = {{ $hasAttendance ? 'true' : 'false' }};
+        if (!hasAttendance) {
+            alert('Anda belum mengisi presensi shift hari ini! Silakan catat presensi terlebih dahulu.');
+            openAttendanceModal();
+            event.preventDefault();
+            return false;
+        }
+
         const selectedOption = typeSelect.options[typeSelect.selectedIndex];
         const isMaterai = checkIsMaterai(selectedOption);
         const isSpp = checkIsSpp(selectedOption);
@@ -788,7 +890,27 @@
     document.addEventListener('DOMContentLoaded', function() {
         openOpeningBalanceModal();
     });
+    @elseif(! $hasAttendance)
+    document.addEventListener('DOMContentLoaded', function() {
+        openAttendanceModal();
+    });
     @endif
+
+    window.openAttendanceModal = function() {
+        const modal = document.getElementById('attendanceModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const input = document.getElementById('attendance_student_note');
+            if (input) setTimeout(() => input.focus(), 100);
+        }
+    };
+
+    window.closeAttendanceModal = function() {
+        const modal = document.getElementById('attendanceModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
         const openingModal = document.getElementById('openingBalanceModal');
@@ -796,6 +918,15 @@
             openingModal.addEventListener('click', function(e) {
                 if (e.target === openingModal) {
                     closeOpeningBalanceModal();
+                }
+            });
+        }
+
+        const attendanceModal = document.getElementById('attendanceModal');
+        if (attendanceModal) {
+            attendanceModal.addEventListener('click', function(e) {
+                if (e.target === attendanceModal) {
+                    closeAttendanceModal();
                 }
             });
         }

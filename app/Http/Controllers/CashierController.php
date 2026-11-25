@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\DailyRecap;
+use App\Models\Setting;
+use App\Models\StaffAttendance;
 use App\Models\StampDutyRecord;
 use App\Models\Transaction;
 use App\Models\TransactionType;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -35,13 +37,22 @@ class CashierController extends Controller
         $previousRecap = DailyRecap::whereDate('recap_date', '<', today())->latest('recap_date')->first();
         $suggestedBniBalance = (float) ($previousRecap?->bni_balance_remaining ?? 0);
 
+        $todayAttendance = StaffAttendance::whereDate('attendance_date', today())
+            ->where('user_id', auth()->id())
+            ->first();
+        $hasAttendance = $todayAttendance !== null;
+        $stampSellingPrice = Setting::getInt(Setting::STAMP_SELLING_PRICE, 11000);
+
         return view('cashier.dashboard', compact(
             'types',
             'stampsStock',
             'todayTransactions',
             'hasOpeningBalance',
             'openingBalance',
-            'suggestedBniBalance'
+            'suggestedBniBalance',
+            'todayAttendance',
+            'hasAttendance',
+            'stampSellingPrice'
         ));
     }
 
@@ -148,15 +159,49 @@ class CashierController extends Controller
         return redirect()->route('kasir.dashboard')->with('success', 'Loket kasir berhasil dibuka! Saldo awal BNI Rp '.number_format($bniBalance, 0, ',', '.').' berhasil disimpan.');
     }
 
+    public function storeAttendance(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_note' => ['required', 'string', 'max:255'],
+        ], [
+            'student_note.required' => 'Catatan kehadiran shift wajib diisi.',
+            'student_note.max' => 'Catatan kehadiran maksimal 255 karakter.',
+        ]);
+
+        StaffAttendance::updateOrCreate(
+            [
+                'attendance_date' => today(),
+                'user_id' => auth()->id(),
+            ],
+            [
+                'student_note' => trim($validated['student_note']),
+            ]
+        );
+
+        return redirect()->route('kasir.dashboard')->with('success', 'Presensi shift hari ini berhasil dicatat!');
+    }
+
     public function storeTransaction(Request $request): RedirectResponse
     {
+        $enforceGates = ! app()->runningUnitTests() || config('app.enforce_shift_gates', false);
+
         $hasOpening = DailyRecap::whereDate('recap_date', today())
             ->whereNotNull('opening_bni_balance')
             ->exists();
 
-        if (! $hasOpening && ! app()->runningUnitTests()) {
+        if ($enforceGates && ! $hasOpening) {
             return back()->withErrors([
                 'transaction_type_id' => 'Loket belum dibuka! Harap input saldo awal terlebih dahulu sebelum memulai transaksi.',
+            ])->withInput();
+        }
+
+        $hasAttendance = StaffAttendance::whereDate('attendance_date', today())
+            ->where('user_id', auth()->id())
+            ->exists();
+
+        if ($enforceGates && ! $hasAttendance) {
+            return back()->withErrors([
+                'transaction_type_id' => 'Anda belum mengisi presensi hari ini! Harap catat kehadiran shift terlebih dahulu sebelum memproses transaksi.',
             ])->withInput();
         }
 
@@ -200,12 +245,13 @@ class CashierController extends Controller
         $type = $selectedType ?? TransactionType::findOrFail($validated['transaction_type_id']);
         $stampsStock = StampDutyRecord::latest('id')->value('remaining_stock') ?? 0;
 
+        $defaultStampPrice = (float) Setting::getInt(Setting::STAMP_SELLING_PRICE, 11000);
         $quantityPurchased = 1;
-        $stampPrice = 11000.0;
+        $stampPrice = $defaultStampPrice;
 
         if ($isMaterai) {
             $quantityPurchased = $request->filled('stamp_quantity') ? (int) $request->input('stamp_quantity') : 1;
-            $stampPrice = $request->filled('stamp_price') ? (float) $request->input('stamp_price') : 11000.0;
+            $stampPrice = $request->filled('stamp_price') ? (float) $request->input('stamp_price') : $defaultStampPrice;
 
             if ($stampsStock <= 0) {
                 return back()->withErrors(['transaction_type_id' => 'Stok materai habis! Transaksi tidak dapat diproses.'])->withInput();
@@ -276,9 +322,6 @@ class CashierController extends Controller
             ]
         );
 
-        $todayCount = Transaction::whereDate('transaction_date', today())->count();
-        $txNumber = $todayCount + 1;
-
         $totalPayment = $amount + $adminFee;
         $txNumber = 1;
 
@@ -286,8 +329,10 @@ class CashierController extends Controller
             $type, $customer, $amount, $adminFee, $totalPayment, $validated,
             $isMaterai, $quantityPurchased, $stampPrice, $stampsStock, &$txNumber
         ) {
-            $todayCount = Transaction::whereDate('transaction_date', today())->lockForUpdate()->count();
-            $txNumber = $todayCount + 1;
+            $maxNumber = (int) Transaction::whereDate('transaction_date', today())
+                ->lockForUpdate()
+                ->max('transaction_number');
+            $txNumber = $maxNumber + 1;
 
             $latestTxToday = Transaction::whereDate('transaction_date', today())
                 ->whereNotNull('bni_balance_after')
@@ -358,13 +403,14 @@ class CashierController extends Controller
         $this->reconcileStampsStockIfNeeded();
 
         $stampsStock = StampDutyRecord::latest('id')->value('remaining_stock') ?? 0;
+        $stampCostPrice = Setting::getInt(Setting::STAMP_COST_PRICE, 10000);
         $recentRestocks = StampDutyRecord::with('cashier')
             ->where('quantity_purchased', '>', 0)
             ->latest('id')
             ->take(10)
             ->get();
 
-        return view('cashier.stamps', compact('stampsStock', 'recentRestocks'));
+        return view('cashier.stamps', compact('stampsStock', 'recentRestocks', 'stampCostPrice'));
     }
 
     public function storeStamp(Request $request): RedirectResponse
@@ -439,13 +485,15 @@ class CashierController extends Controller
         }
 
         $stampsStock = StampDutyRecord::latest('id')->value('remaining_stock') ?? 0;
+        $stampCostPrice = Setting::getInt(Setting::STAMP_COST_PRICE, 10000);
 
         return view('cashier.eod', compact(
             'recap',
             'hasOpeningBalance',
             'bniBalanceSystem',
             'cashInSystem',
-            'stampsStock'
+            'stampsStock',
+            'stampCostPrice'
         ));
     }
 
@@ -468,7 +516,7 @@ class CashierController extends Controller
         $bniActual = (float) $validated['actual_bni_balance'];
         $cashActual = (float) $validated['actual_cash_amount'];
         $stampCount = (int) $validated['actual_stamp_count'];
-        $stampPrice = 10000;
+        $stampPrice = Setting::getInt(Setting::STAMP_COST_PRICE, 10000);
         $stampTotalValue = $stampCount * $stampPrice;
         $grandTotal = $bniActual + $cashActual + $stampTotalValue;
 
@@ -505,7 +553,7 @@ class CashierController extends Controller
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = auth()->user();
         $user->update([
             'password' => $validated['password'],
@@ -537,7 +585,9 @@ class CashierController extends Controller
         foreach ($saleRecords as $sale) {
             if (preg_match('/Transaksi #(\d+)/', (string) $sale->notes, $matches)) {
                 $trxNumber = $matches[1];
-                $exists = Transaction::where('transaction_number', $trxNumber)->exists();
+                $exists = Transaction::whereDate('transaction_date', $sale->record_date)
+                    ->where('transaction_number', $trxNumber)
+                    ->exists();
                 if (! $exists) {
                     $sale->delete();
                     $needsRecount = true;

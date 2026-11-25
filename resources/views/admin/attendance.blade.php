@@ -3,6 +3,27 @@
 @section('page_title', 'Rekap Presensi')
 
 @section('admin_content')
+@if(session('success'))
+<div class="mb-4 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-center justify-between">
+    <div class="flex items-center">
+        <svg class="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>{{ session('success') }}</span>
+    </div>
+</div>
+@endif
+
+@if($errors->any())
+<div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+    <ul class="list-disc list-inside space-y-1 text-xs text-red-600">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="p-6">
         <table class="w-full text-sm text-left">
@@ -20,12 +41,18 @@
                 @forelse($attendances as $att)
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-4 py-3 font-medium">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td>
-                    <td class="px-4 py-3">{{ $att->user->full_name }}</td>
-                    <td class="px-4 py-3">{{ $att->user->class_group }}</td>
+                    <td class="px-4 py-3">{{ $att->user?->full_name ?? '-' }}</td>
+                    <td class="px-4 py-3">{{ $att->user?->class_group ?? '-' }}</td>
                     <td class="px-4 py-3">{{ $att->student_note ?? '-' }}</td>
                     <td class="px-4 py-3">{{ $att->teacher_note ?? '-' }}</td>
                     <td class="px-4 py-3">
-                        <button class="text-teal-600 hover:underline">Edit Catatan</button>
+                        <button
+                            type="button"
+                            onclick='openAttendanceModal(@json($att->id), @json($att->user?->full_name ?? "-"), @json(\Carbon\Carbon::parse($att->attendance_date)->format("d/m/Y")), @json($att->student_note ?? ""), @json($att->teacher_note ?? ""))'
+                            class="text-teal-600 hover:underline font-medium cursor-pointer"
+                        >
+                            Edit Catatan
+                        </button>
                     </td>
                 </tr>
                 @empty
@@ -41,4 +68,75 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Edit Catatan Presensi -->
+<div id="attendanceEditModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm transition-opacity p-4">
+    <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Edit Catatan Presensi</h3>
+            <button type="button" onclick="closeAttendanceModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none cursor-pointer">&times;</button>
+        </div>
+
+        <form id="attendanceEditForm" method="POST" action="">
+            @csrf
+            @method('PUT')
+
+            <div class="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 space-y-1 mb-4 border border-gray-100">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Petugas Kasir:</span>
+                    <span id="attModalName" class="font-semibold text-gray-800"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Tanggal:</span>
+                    <span id="attModalDate" class="font-medium text-gray-800"></span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="att_student_note" class="block text-xs font-medium text-gray-700 mb-1">Catatan Siswa</label>
+                <textarea name="student_note" id="att_student_note" rows="2" maxlength="255" class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2.5 border" placeholder="Catatan shift siswa..."></textarea>
+            </div>
+
+            <div class="mb-5">
+                <label for="att_teacher_note" class="block text-xs font-medium text-gray-700 mb-1">Catatan Guru Pembimbing</label>
+                <textarea name="teacher_note" id="att_teacher_note" rows="2" maxlength="255" class="w-full text-xs rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2.5 border" placeholder="Evaluasi atau catatan guru..."></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeAttendanceModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-medium shadow-sm transition-colors cursor-pointer">
+                    Simpan Catatan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAttendanceModal(id, name, date, studentNote, teacherNote) {
+        document.getElementById('attModalName').textContent = name;
+        document.getElementById('attModalDate').textContent = date;
+        document.getElementById('att_student_note').value = studentNote || '';
+        document.getElementById('att_teacher_note').value = teacherNote || '';
+        document.getElementById('attendanceEditForm').action = '/admin/attendance/' + id;
+        document.getElementById('attendanceEditModal').classList.remove('hidden');
+    }
+
+    function closeAttendanceModal() {
+        document.getElementById('attendanceEditModal').classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('attendanceEditModal');
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeAttendanceModal();
+                }
+            });
+        }
+    });
+</script>
 @endsection
