@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Customer;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\StampDutyRecord;
 use App\Models\Transaction;
 use App\Models\TransactionType;
@@ -873,5 +874,67 @@ class CashierTransactionTest extends TestCase
             'transaction_type_id' => $sppType->id,
             'customer_identifier' => '9884456512511177',
         ]);
+    }
+
+    public function test_transaction_number_increments_monotonically_after_deletion(): void
+    {
+        $cashier = $this->createCashierUser();
+        $type = TransactionType::firstOrCreate(
+            ['code' => 'setor_tunai_bni'],
+            ['name' => 'Setor Tunai BNI', 'is_active' => true]
+        );
+
+        for ($i = 1; $i <= 3; $i++) {
+            $this->actingAs($cashier)->post(route('kasir.transactions.store'), [
+                'transaction_type_id' => $type->id,
+                'customer_identifier' => "0812000{$i}",
+                'customer_name' => "Customer {$i}",
+                'amount' => 50000,
+                'admin_fee' => 1000,
+            ]);
+        }
+
+        // Hapus transaksi #2
+        Transaction::where('transaction_number', 2)->delete();
+
+        // Transaksi berikutnya harus menjadi #4, bukan duplikat #3
+        $this->actingAs($cashier)->post(route('kasir.transactions.store'), [
+            'transaction_type_id' => $type->id,
+            'customer_identifier' => '08120004',
+            'customer_name' => 'Customer 4',
+            'amount' => 50000,
+            'admin_fee' => 1000,
+        ]);
+
+        $latest = Transaction::latest('id')->first();
+        $this->assertEquals(4, $latest->transaction_number);
+    }
+
+    public function test_stamp_selling_price_setting_controls_default_materai_price(): void
+    {
+        $cashier = $this->createCashierUser();
+        $type = TransactionType::firstOrCreate(
+            ['code' => 'materai'],
+            ['name' => 'Materai', 'is_active' => true]
+        );
+
+        Setting::setValue(Setting::STAMP_SELLING_PRICE, 12500);
+
+        StampDutyRecord::create([
+            'record_date' => today(),
+            'quantity_sold' => 0,
+            'quantity_purchased' => 10,
+            'remaining_stock' => 10,
+            'amount' => 100000,
+        ]);
+
+        $this->actingAs($cashier)->post(route('kasir.transactions.store'), [
+            'transaction_type_id' => $type->id,
+            'customer_name' => 'Pembeli Setting Harga',
+            'stamp_quantity' => 2,
+        ])->assertRedirect(route('kasir.dashboard'));
+
+        $tx = Transaction::latest('id')->first();
+        $this->assertEquals(25000, (float) $tx->amount);
     }
 }

@@ -39,7 +39,7 @@ class SimpleSpreadsheetReader
     public static function readCsv(string $filePath): array
     {
         $rows = [];
-        if (! file_exists($filePath) || ! is_readable($filePath)) {
+        if (! file_exists($filePath)) {
             return [];
         }
 
@@ -140,7 +140,7 @@ class SimpleSpreadsheetReader
 
             // Jika sheet memiliki nama (misal nama tab "MPLB XI-1"), sematkan penanda rombel
             if (! empty($sheetInfo['name'])) {
-                $rows[] = ['Rombel', ': ' . $sheetInfo['name']];
+                $rows[] = ['Rombel', ': '.$sheetInfo['name']];
             }
 
             $sheetRows = self::parseWorksheetXml($sheetXml, $sharedStrings);
@@ -262,7 +262,7 @@ class SimpleSpreadsheetReader
                     if ($id && $target) {
                         $targetPath = str_replace('\\', '/', ltrim($target, '/'));
                         if (! str_starts_with($targetPath, 'xl/')) {
-                            $targetPath = 'xl/' . $targetPath;
+                            $targetPath = 'xl/'.$targetPath;
                         }
                         $relMap[$id] = $targetPath;
                     }

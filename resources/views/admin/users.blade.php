@@ -130,7 +130,7 @@
 @if($hasActiveFilter)
 <div class="mb-3 text-xs text-gray-500 flex flex-wrap items-center justify-between gap-2">
     <span>
-        Menampilkan <strong>{{ $users->count() }}</strong> user
+        Menampilkan <strong>{{ $users->total() }}</strong> user
         @if(!empty($search)) dengan kata kunci "<strong class="text-gray-800">{{ $search }}</strong>"@endif
         @if(!empty($selectedRole)) [Role: <strong class="text-gray-800">{{ $selectedRole }}</strong>]@endif
         @if($selectedStatus !== null && $selectedStatus !== '') [Status: <strong class="text-gray-800">{{ $selectedStatus === '1' ? 'Aktif' : 'Nonaktif' }}</strong>]@endif
@@ -202,6 +202,10 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="mt-4">
+            {{ $users->links() }}
         </div>
     </div>
 </div>
@@ -388,41 +392,22 @@
         }
 
         const searchInput = document.getElementById('searchUserInput');
-        const roleSelect = document.getElementById('roleFilterSelect');
-        const statusSelect = document.getElementById('statusFilterSelect');
-        const rows = document.querySelectorAll('.user-row');
-        const clientEmpty = document.getElementById('clientEmptyRow');
+        const filterForm = document.getElementById('userFilterForm');
+        let searchDebounceTimer = null;
 
-        function filterRows() {
-            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-            const selectedRole = (roleSelect ? roleSelect.value : '').toLowerCase();
-            const selectedStatus = statusSelect ? statusSelect.value : '';
-            let visibleCount = 0;
-
-            rows.forEach(function (row) {
-                const text = row.textContent.toLowerCase();
-                const rowRole = (row.getAttribute('data-role') || '').toLowerCase();
-                const rowStatus = row.getAttribute('data-status') || '';
-
-                const matchesQuery = (query === '' || text.includes(query));
-                const matchesRole = (selectedRole === '' || rowRole === selectedRole);
-                const matchesStatus = (selectedStatus === '' || rowStatus === selectedStatus);
-
-                if (matchesQuery && matchesRole && matchesStatus) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            if (clientEmpty) {
-                clientEmpty.style.display = (visibleCount === 0 && (query !== '' || selectedRole !== '' || selectedStatus !== '')) ? '' : 'none';
+        if (searchInput && filterForm) {
+            if (searchInput.value.trim() !== '') {
+                const len = searchInput.value.length;
+                searchInput.focus();
+                searchInput.setSelectionRange(len, len);
             }
-        }
 
-        if (searchInput && rows.length > 0) {
-            searchInput.addEventListener('input', filterRows);
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(function () {
+                    filterForm.submit();
+                }, 400);
+            });
         }
     });
 </script>

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Customer;
+use App\Models\DailyRecap;
 use App\Models\Role;
 use App\Models\StampDutyRecord;
 use App\Models\Transaction;
@@ -274,5 +275,140 @@ class AdminTransactionTest extends TestCase
         $response->assertSee('Setor Tunai BNI');
         $response->assertSee('Rp 750.000');
         $response->assertSee('Selesai');
+    }
+
+    public function test_admin_deleting_transaction_recalculates_subsequent_bni_balances_and_daily_recap(): void
+    {
+        $admin = $this->createAdminUser();
+        $cashier = $this->createCashierUser();
+        $setorType = TransactionType::firstOrCreate(
+            ['code' => 'setor_tunai_bni'],
+            ['name' => 'Setor Tunai BNI', 'is_active' => true]
+        );
+        $tarikType = TransactionType::firstOrCreate(
+            ['code' => 'tarik_tunai'],
+            ['name' => 'Tarik Tunai', 'is_active' => true]
+        );
+
+        // Buka loket saldo awal 10.000.000
+        DailyRecap::create([
+            'recap_date' => today(),
+            'opening_bni_balance' => 10000000,
+            'opening_cash_balance' => 500000,
+            'bni_balance_remaining' => 10000000,
+            'cash_amount' => 500000,
+            'opened_by' => $cashier->id,
+        ]);
+
+        // Transaksi #1: Setor 2.000.000 -> sisa 8.000.000
+        $this->actingAs($cashier)->post(route('kasir.transactions.store'), [
+            'transaction_type_id' => $setorType->id,
+            'customer_identifier' => '1111111111',
+            'customer_name' => 'Nasabah Satu',
+            'amount' => 2000000,
+            'admin_fee' => 2500,
+        ]);
+
+        // Transaksi #2: Tarik 500.000 -> sisa 8.500.000
+        $this->actingAs($cashier)->post(route('kasir.transactions.store'), [
+            'transaction_type_id' => $tarikType->id,
+            'customer_identifier' => '2222222222',
+            'customer_name' => 'Nasabah Dua',
+            'amount' => 500000,
+            'admin_fee' => 3000,
+        ]);
+
+        // Transaksi #3: Setor 1.000.000 -> sisa 7.500.000
+        $this->actingAs($cashier)->post(route('kasir.transactions.store'), [
+            'transaction_type_id' => $setorType->id,
+            'customer_identifier' => '3333333333',
+            'customer_name' => 'Nasabah Tiga',
+            'amount' => 1000000,
+            'admin_fee' => 2500,
+        ]);
+
+        $tx1 = Transaction::where('transaction_number', 1)->first();
+        $tx2 = Transaction::where('transaction_number', 2)->first();
+        $tx3 = Transaction::where('transaction_number', 3)->first();
+
+        $this->assertEquals(8000000, (float) $tx1->bni_balance_after);
+        $this->assertEquals(8500000, (float) $tx2->bni_balance_after);
+        $this->assertEquals(7500000, (float) $tx3->bni_balance_after);
+
+        // Hapus Transaksi #1 -> saldo akhir harus dihitung ulang: 10.000.000 + 500.000 - 1.000.000 = 9.500.000
+        $this->actingAs($admin)->delete(route('admin.transactions.destroy', $tx1->id))
+            ->assertRedirect(route('admin.transactions'));
+
+        $tx2->refresh();
+        $tx3->refresh();
+        $this->assertEquals(10500000, (float) $tx2->bni_balance_after);
+        $this->assertEquals(9500000, (float) $tx3->bni_balance_after);
+
+        $recap = DailyRecap::whereDate('recap_date', today())->first();
+        $this->assertEquals(9500000, (float) $recap->bni_balance_remaining);
+    }
+
+    public function test_admin_deleting_materai_transaction_1_does_not_delete_stamp_record_10(): void
+    {
+        $admin = $this->createAdminUser();
+        $cashier = $this->createCashierUser();
+        $type = TransactionType::firstOrCreate(
+            ['code' => 'materai'],
+            ['name' => 'Materai', 'is_active' => true]
+        );
+
+        StampDutyRecord::create([
+            'record_date' => today(),
+            'quantity_sold' => 0,
+            'quantity_purchased' => 20,
+            'remaining_stock' => 20,
+            'amount' => 200000,
+        ]);
+
+        $customer = Customer::create([
+            'transaction_type_id' => $type->id,
+            'customer_identifier' => 'MTR-1',
+            'customer_name' => 'Pembeli 1',
+        ]);
+
+        // Transaksi #1 (1 pcs) dan Transaksi #10 (5 pcs)
+        $trx1 = Transaction::create([
+            'transaction_number' => 1,
+            'transaction_date' => today(),
+            'transaction_type_id' => $type->id,
+            'customer_id' => $customer->id,
+            'amount' => 11000,
+            'admin_fee' => 0,
+            'total_payment' => 11000,
+            'cashier_id' => $cashier->id,
+        ]);
+
+        // Catat record penjualan #10 lebih dulu agar latest('id') akan menyentuhnya jika wildcard salah
+        $stamp1 = StampDutyRecord::create([
+            'record_date' => today(),
+            'quantity_sold' => 1,
+            'quantity_purchased' => 0,
+            'remaining_stock' => 19,
+            'amount' => 11000,
+            'notes' => 'Penjualan Materai 1 pcs @ Rp 11.000 (Transaksi #1)',
+        ]);
+
+        $stamp10 = StampDutyRecord::create([
+            'record_date' => today(),
+            'quantity_sold' => 5,
+            'quantity_purchased' => 0,
+            'remaining_stock' => 14,
+            'amount' => 55000,
+            'notes' => 'Penjualan Materai 5 pcs @ Rp 11.000 (Transaksi #10)',
+        ]);
+
+        $this->actingAs($admin)->delete(route('admin.transactions.destroy', $trx1->id))
+            ->assertRedirect(route('admin.transactions'));
+
+        // Record penjualan #1 terhapus, record #10 tetap utuh dan stok tersisa jadi 15 (20 - 5)
+        $this->assertDatabaseMissing('stamp_duty_records', ['id' => $stamp1->id]);
+        $this->assertDatabaseHas('stamp_duty_records', ['id' => $stamp10->id]);
+        $stamp10->refresh();
+        $this->assertEquals(15, $stamp10->remaining_stock);
     }
 }

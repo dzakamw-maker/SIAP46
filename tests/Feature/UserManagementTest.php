@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -523,5 +524,37 @@ class UserManagementTest extends TestCase
         $response = $this->actingAs($kasir)->delete(route('admin.users.delete-all-cashiers'));
 
         $response->assertStatus(403);
+    }
+
+    public function test_users_list_is_paginated(): void
+    {
+        $adminRole = Role::create(['name' => 'Admin']);
+        $kasirRole = Role::create(['name' => 'Kasir']);
+
+        $admin = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Utama',
+            'username' => 'admin_pag',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        for ($i = 1; $i <= 25; $i++) {
+            User::create([
+                'role_id' => $kasirRole->id,
+                'full_name' => "Siswa Kasir {$i}",
+                'username' => "siswa_pag_{$i}",
+                'password' => 'secret123',
+                'is_active' => true,
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.users'));
+        $response->assertStatus(200);
+
+        $users = $response->viewData('users');
+        $this->assertInstanceOf(LengthAwarePaginator::class, $users);
+        $this->assertEquals(20, $users->perPage());
+        $this->assertEquals(26, $users->total());
     }
 }
