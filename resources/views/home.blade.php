@@ -3,49 +3,51 @@
 @section('title', 'SIAP46 | Platform Kasir & Mini Bank Mitra Agen BNI 46 Sekolah')
 
 @section('content')
-<div class="min-h-screen flex flex-col bg-white text-slate-800 font-sans selection:bg-[#005e6a] selection:text-white antialiased">
+<div class="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-[#005e6a] selection:text-white antialiased transition-colors duration-200">
 
     <!-- Top Announcement Bar (Official BNI Agen46 Info) -->
-    <div class="bg-[#005e6a]/5 border-b border-[#005e6a]/15 text-xs py-2 px-4 text-slate-600">
+    <div class="bg-[#005e6a]/5 dark:bg-teal-950/50 border-b border-[#005e6a]/15 dark:border-teal-900/60 text-xs py-2 px-4 text-slate-600 dark:text-slate-300">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
             <div class="flex items-center gap-2">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#005e6a] text-white">
                     <span class="w-1.5 h-1.5 rounded-full bg-[#f15a23] mr-1.5 animate-pulse"></span>
                     Mitra Agen BNI 46
                 </span>
-                <span class="text-slate-800 font-medium">Unit Mini Bank & Loket Kasir Sekolah • Business Center Lantai 1</span>
+                <span class="text-slate-800 dark:text-slate-200 font-medium">Unit Mini Bank & Loket Kasir Sekolah • Business Center Lantai 1</span>
             </div>
-            <div class="flex items-center gap-4 text-[11px] text-slate-600">
-                <span>Operasional: <strong class="text-slate-900">07.30 - 15.30 WIB</strong></span>
+            <div class="flex items-center gap-4 text-[11px] text-slate-600 dark:text-slate-400">
+                <span>Operasional: <strong class="text-slate-900 dark:text-white">07.30 - 15.30 WIB</strong></span>
                 <span class="hidden md:inline">•</span>
-                <span class="hidden md:inline font-semibold text-[#005e6a]">Teaching Factory Kejuruan Akuntansi</span>
+                <span class="hidden md:inline font-semibold text-[#005e6a] dark:text-teal-400">Teaching Factory Kejuruan Akuntansi</span>
             </div>
         </div>
     </div>
 
     <!-- Navigation Header (Clean Minimalist with Strong BNI Brand Elements) -->
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 
                 <!-- Logo Brand -->
                 <a href="{{ route('home') }}" class="flex items-center group">
-                    <span class="text-2xl font-black tracking-tight text-slate-900">SIAP<span class="text-[#f15a23]">46</span></span>
+                    <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">SIAP<span class="text-[#f15a23]">46</span></span>
                 </a>
 
                 <!-- Centered Nav Links -->
-                <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-600">
-                    <a href="#beranda" class="hover:text-[#005e6a] transition-colors">Beranda</a>
-                    <a href="#dashboard" class="hover:text-[#005e6a] transition-colors">Demo POS</a>
-                    <a href="#layanan" class="hover:text-[#005e6a] transition-colors">Daftar Layanan</a>
-                    <a href="#fitur" class="hover:text-[#005e6a] transition-colors">Fitur Sistem</a>
-                    <a href="#tarif" class="hover:text-[#005e6a] transition-colors">Tarif Biaya</a>
-                    <a href="#simulasi" class="hover:text-[#005e6a] transition-colors">Simulasi</a>
-                    <a href="#faq" class="hover:text-[#005e6a] transition-colors">FAQ</a>
+                <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                    <a href="#beranda" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">Beranda</a>
+                    <a href="#dashboard" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">Demo POS</a>
+                    <a href="#layanan" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">Daftar Layanan</a>
+                    <a href="#fitur" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">Fitur Sistem</a>
+                    <a href="#tarif" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">Tarif Biaya</a>
+                    <a href="#simulasi" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">Simulasi</a>
+                    <a href="#faq" class="hover:text-[#005e6a] dark:hover:text-teal-400 transition-colors">FAQ</a>
                 </nav>
 
                 <!-- Right Action Button -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <x-theme-toggle class="p-2.5 rounded-full" />
+
                     @auth
                         @if(auth()->user()->role && (auth()->user()->role->name === 'Admin' || auth()->user()->role->name === 'Guru'))
                             <a href="{{ url('/') }}" class="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-[#005e6a] hover:bg-[#004750] shadow-sm transition-all hover:scale-105">
@@ -63,7 +65,7 @@
                     @endauth
 
                     <!-- Mobile Menu Button -->
-                    <button type="button" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg focus:outline-none" aria-label="Menu">
+                    <button type="button" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg focus:outline-none" aria-label="Menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -74,36 +76,36 @@
         </div>
 
         <!-- Mobile Navigation Menu -->
-        <div id="mobileMenu" class="hidden lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
-            <a href="#beranda" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Beranda</a>
-            <a href="#dashboard" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Demo POS</a>
-            <a href="#layanan" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Daftar Layanan</a>
-            <a href="#fitur" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Fitur Sistem</a>
-            <a href="#tarif" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Tarif Biaya</a>
-            <a href="#simulasi" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Simulasi</a>
-            <a href="#faq" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">FAQ</a>
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-5 space-y-2">
+            <a href="#beranda" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Beranda</a>
+            <a href="#dashboard" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Demo POS</a>
+            <a href="#layanan" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Daftar Layanan</a>
+            <a href="#fitur" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Fitur Sistem</a>
+            <a href="#tarif" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Tarif Biaya</a>
+            <a href="#simulasi" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Simulasi</a>
+            <a href="#faq" onclick="document.getElementById('mobileMenu').classList.add('hidden')" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">FAQ</a>
         </div>
     </header>
 
     <!-- SECTION 1: HERO SECTION WITH HIGH-FIDELITY BNI DASHBOARD PREVIEW -->
-    <section id="beranda" class="relative pt-16 pb-20 lg:pt-24 lg:pb-32 bg-gradient-to-b from-[#005e6a]/5 via-white to-white text-center px-4 overflow-hidden">
+    <section id="beranda" class="relative pt-16 pb-20 lg:pt-24 lg:pb-32 bg-gradient-to-b from-[#005e6a]/5 via-white to-white dark:from-teal-950/30 dark:via-slate-950 dark:to-slate-950 text-center px-4 overflow-hidden">
         
         <div class="max-w-5xl mx-auto space-y-6">
             
             <!-- Pill Tag -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#005e6a]/20 text-xs font-semibold text-[#005e6a] shadow-2xs">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-[#005e6a]/20 dark:border-teal-800/60 text-xs font-semibold text-[#005e6a] dark:text-teal-300 shadow-2xs">
                 <span class="w-2 h-2 rounded-full bg-[#f15a23]"></span>
                 <span>Mitra Resmi Agen46 PT Bank Negara Indonesia (Persero) Tbk</span>
             </div>
 
             <!-- Big Centered Headline with BNI Accent -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.12]">
                 Pencatatan Transaksi & Kasir <br class="hidden sm:inline">
                 <span class="text-[#f15a23]">Agen BNI 46</span> Sekolah yang Terstandar
             </h1>
 
             <!-- Subtitle -->
-            <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
+            <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
                 Kelola transaksi perbankan siswa, setor & tarik tunai BNI, transfer dana, pembayaran tagihan, top-up e-wallet, dan rekonsiliasi harian (EOD) secara akurat sesuai standar operasional perbankan BNI.
             </p>
 
@@ -113,7 +115,7 @@
                     <span>Akses Kasir Agen46</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </a>
-                <a href="#layanan" class="w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-bold text-[#005e6a] bg-white hover:bg-[#005e6a]/5 border-2 border-[#005e6a] transition-colors shadow-2xs">
+                <a href="#layanan" class="w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-bold text-[#005e6a] dark:text-teal-300 bg-white dark:bg-slate-900 hover:bg-[#005e6a]/5 dark:hover:bg-teal-950/60 border-2 border-[#005e6a] dark:border-teal-500 transition-colors shadow-2xs">
                     Daftar Layanan & Tarif
                 </a>
             </div>
@@ -122,53 +124,53 @@
 
         <!-- High-Fidelity Desktop Dashboard Preview (BNI Agen46 Terminal Aesthetic) -->
         <div id="dashboard" class="max-w-6xl mx-auto mt-16 px-2 sm:px-4">
-            <div class="rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-300/40 overflow-hidden text-left">
+            <div class="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300/40 dark:shadow-black/50 overflow-hidden text-left">
                 
                 <!-- Terminal Window Header -->
-                <div class="bg-slate-100/90 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+                <div class="bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-slate-300"></span>
-                        <span class="w-3 h-3 rounded-full bg-slate-300"></span>
-                        <span class="w-3 h-3 rounded-full bg-slate-300"></span>
+                        <span class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                        <span class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                        <span class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                         <div class="flex items-center gap-1.5 ml-2">
                             <span class="w-2 h-2 rounded-full bg-[#f15a23]"></span>
-                            <span class="text-xs font-bold text-[#005e6a] font-mono">bni-agen46.pos/terminal-01</span>
+                            <span class="text-xs font-bold text-[#005e6a] dark:text-teal-400 font-mono">bni-agen46.pos/terminal-01</span>
                         </div>
                     </div>
-                    <div class="text-[11px] font-semibold text-slate-700 flex items-center gap-2">
+                    <div class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#005e6a] text-white">ID: 46-SMK-JKT</span>
-                        <span class="text-slate-600">Petugas: Siswa Piket Kasir</span>
+                        <span class="text-slate-600 dark:text-slate-400">Petugas: Siswa Piket Kasir</span>
                     </div>
                 </div>
 
                 <!-- Dashboard Interior Body -->
-                <div class="p-6 bg-slate-50/50 space-y-6">
+                <div class="p-6 bg-slate-50/50 dark:bg-slate-950/60 space-y-6">
                     
                     <!-- Top 4 Summary Metric Cards with BNI Branding Accents -->
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs relative overflow-hidden">
+                        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs relative overflow-hidden">
                             <div class="absolute top-0 left-0 right-0 h-1 bg-[#005e6a]"></div>
-                            <div class="text-xs text-slate-500 font-medium">Jam Kerja Operasional</div>
-                            <div class="text-2xl font-black text-slate-900 mt-1">07.30 - 15.30</div>
-                            <div class="text-[11px] text-[#005e6a] mt-1 font-bold">Senin - Jumat (WIB)</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Jam Kerja Operasional</div>
+                            <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">07.30 - 15.30</div>
+                            <div class="text-[11px] text-[#005e6a] dark:text-teal-400 mt-1 font-bold">Senin - Jumat (WIB)</div>
                         </div>
-                        <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs relative overflow-hidden">
+                        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs relative overflow-hidden">
                             <div class="absolute top-0 left-0 right-0 h-1 bg-[#005e6a]"></div>
-                            <div class="text-xs text-slate-500 font-medium">Kas Masuk (Setoran BNI)</div>
-                            <div class="text-2xl font-black text-slate-900 mt-1">Rp 2.850.000</div>
-                            <div class="text-[11px] text-emerald-700 mt-1 font-semibold">Uang Tunai Laci Kasir</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Kas Masuk (Setoran BNI)</div>
+                            <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">Rp 2.850.000</div>
+                            <div class="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1 font-semibold">Uang Tunai Laci Kasir</div>
                         </div>
-                        <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs relative overflow-hidden">
+                        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs relative overflow-hidden">
                             <div class="absolute top-0 left-0 right-0 h-1 bg-[#f15a23]"></div>
-                            <div class="text-xs text-slate-500 font-medium">Kas Keluar (Tarik Tunai)</div>
-                            <div class="text-2xl font-black text-slate-900 mt-1">Rp 900.000</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Kas Keluar (Tarik Tunai)</div>
+                            <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">Rp 900.000</div>
                             <div class="text-[11px] text-[#f15a23] mt-1 font-bold">Debit EDC BNI</div>
                         </div>
-                        <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs relative overflow-hidden">
+                        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs relative overflow-hidden">
                             <div class="absolute top-0 left-0 right-0 h-1 bg-[#005e6a]"></div>
-                            <div class="text-xs text-slate-500 font-medium">Status Rekonsiliasi (EOD)</div>
-                            <div class="text-2xl font-black text-slate-900 mt-1">Seimbang</div>
-                            <div class="text-[11px] text-[#005e6a] mt-1 font-bold">Selisih: Rp 0 (Cocok)</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Status Rekonsiliasi (EOD)</div>
+                            <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">Seimbang</div>
+                            <div class="text-[11px] text-[#005e6a] dark:text-teal-400 mt-1 font-bold">Selisih: Rp 0 (Cocok)</div>
                         </div>
                     </div>
 
@@ -176,34 +178,34 @@
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         
                         <!-- Left Chart Visual (Teal Line Graph with Orange Data Points) -->
-                        <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-2xs space-y-4">
+                        <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="text-sm font-bold text-slate-900">Grafik Kepadatan Jam Operasional</h4>
-                                    <p class="text-xs text-slate-500">Tingkat kunjungan siswa tertinggi terjadi saat jam istirahat sekolah</p>
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Grafik Kepadatan Jam Operasional</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Tingkat kunjungan siswa tertinggi terjadi saat jam istirahat sekolah</p>
                                 </div>
-                                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#005e6a]/10 text-[#005e6a] border border-[#005e6a]/20">Real-Time</span>
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#005e6a]/10 dark:bg-teal-950/70 text-[#005e6a] dark:text-teal-300 border border-[#005e6a]/20 dark:border-teal-800/60">Real-Time</span>
                             </div>
 
                             <!-- SVG Chart Graph Mockup in BNI Teal & Orange -->
                             <div class="pt-4">
                                 <svg class="w-full h-44" viewBox="0 0 500 160" fill="none">
-                                    <path d="M 0,130 C 50,130 90,70 140,70 C 190,70 190,95 235,95 C 280,95 295,35 340,35 C 385,35 420,75 500,75" stroke="#005e6a" stroke-width="3" fill="none" />
-                                    <path d="M 0,130 C 50,130 90,70 140,70 C 190,70 190,95 235,95 C 280,95 295,35 340,35 C 385,35 420,75 500,75 L 500,160 L 0,160 Z" fill="url(#chartGradient)" opacity="0.12" />
+                                    <path class="stroke-[#005e6a] dark:stroke-teal-400" d="M 0,130 C 50,130 90,70 140,70 C 190,70 190,95 235,95 C 280,95 295,35 340,35 C 385,35 420,75 500,75" stroke-width="3" fill="none" />
+                                    <path d="M 0,130 C 50,130 90,70 140,70 C 190,70 190,95 235,95 C 280,95 295,35 340,35 C 385,35 420,75 500,75 L 500,160 L 0,160 Z" fill="url(#chartGradient)" opacity="0.14" />
                                     <defs>
                                         <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stop-color="#005e6a" />
-                                            <stop offset="100%" stop-color="#005e6a" stop-opacity="0" />
+                                            <stop offset="0%" stop-color="#14b8a6" />
+                                            <stop offset="100%" stop-color="#14b8a6" stop-opacity="0" />
                                         </linearGradient>
                                     </defs>
                                     <!-- Key BNI Orange markers precisely on curve points -->
-                                    <circle cx="140" cy="70" r="5" fill="#f15a23" stroke="#ffffff" stroke-width="2" />
-                                    <circle cx="340" cy="35" r="6" fill="#f15a23" stroke="#ffffff" stroke-width="2" />
-                                    <circle cx="500" cy="75" r="5" fill="#f15a23" stroke="#ffffff" stroke-width="2" />
+                                    <circle class="stroke-white dark:stroke-slate-900" cx="140" cy="70" r="5" fill="#f15a23" stroke-width="2" />
+                                    <circle class="stroke-white dark:stroke-slate-900" cx="340" cy="35" r="6" fill="#f15a23" stroke-width="2" />
+                                    <circle class="stroke-white dark:stroke-slate-900" cx="500" cy="75" r="5" fill="#f15a23" stroke-width="2" />
                                 </svg>
-                                <div class="flex justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100 font-medium">
+                                <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 font-medium">
                                     <span>07.00 (Buka Loket)</span>
-                                    <span class="font-bold text-[#005e6a]">09.45 (Istirahat 1)</span>
+                                    <span class="font-bold text-[#005e6a] dark:text-teal-400">09.45 (Istirahat 1)</span>
                                     <span class="font-bold text-[#f15a23]">12.00 (Puncak Istirahat 2)</span>
                                     <span>15.00 (Tutup Buku EOD)</span>
                                 </div>
@@ -211,43 +213,43 @@
                         </div>
 
                         <!-- Right Working Hours / Shift Schedule Panel -->
-                        <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-2xs space-y-3">
+                        <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
                             <div class="flex items-center justify-between">
-                                <h4 class="text-sm font-bold text-slate-900">Jadwal Jam Kerja Loket</h4>
-                                <span class="text-xs text-[#005e6a] font-bold">Senin - Jumat</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white">Jadwal Jam Kerja Loket</h4>
+                                <span class="text-xs text-[#005e6a] dark:text-teal-400 font-bold">Senin - Jumat</span>
                             </div>
 
                             <div class="space-y-2 text-xs">
-                                <div class="p-2.5 rounded-lg bg-[#005e6a]/5 border border-[#005e6a]/15 flex items-center justify-between">
+                                <div class="p-2.5 rounded-lg bg-[#005e6a]/5 dark:bg-teal-950/50 border border-[#005e6a]/15 dark:border-teal-800/50 flex items-center justify-between">
                                     <div>
-                                        <div class="font-bold text-slate-900">Sesi Pagi (Sebelum Masuk)</div>
-                                        <div class="text-[11px] text-slate-500">Buka laci kasir & layanan awal siswa</div>
+                                        <div class="font-bold text-slate-900 dark:text-white">Sesi Pagi (Sebelum Masuk)</div>
+                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Buka laci kasir & layanan awal siswa</div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="font-bold text-[#005e6a]">07.30 - 09.45</div>
-                                        <span class="text-[10px] text-emerald-700 font-semibold">Aktif</span>
+                                        <div class="font-bold text-[#005e6a] dark:text-teal-400">07.30 - 09.45</div>
+                                        <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">Aktif</span>
                                     </div>
                                 </div>
 
-                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center justify-between">
                                     <div>
-                                        <div class="font-bold text-slate-800">Sesi Istirahat 1 & 2 (Puncak)</div>
-                                        <div class="text-[11px] text-slate-500">Waktu utama transaksi siswa & guru</div>
+                                        <div class="font-bold text-slate-800 dark:text-slate-100">Sesi Istirahat 1 & 2 (Puncak)</div>
+                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Waktu utama transaksi siswa & guru</div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="font-bold text-slate-900">09.45 - 13.00</div>
+                                        <div class="font-bold text-slate-900 dark:text-white">09.45 - 13.00</div>
                                         <span class="text-[10px] text-[#f15a23] font-semibold">Padat</span>
                                     </div>
                                 </div>
 
-                                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                <div class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center justify-between">
                                     <div>
-                                        <div class="font-bold text-slate-800">Sesi Sore & Tutup Buku (EOD)</div>
-                                        <div class="text-[11px] text-slate-500">Hitung kas fisik & verifikasi guru</div>
+                                        <div class="font-bold text-slate-800 dark:text-slate-100">Sesi Sore & Tutup Buku (EOD)</div>
+                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Hitung kas fisik & verifikasi guru</div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="font-bold text-slate-900">13.00 - 15.30</div>
-                                        <span class="text-[10px] text-slate-600 font-semibold">Rekap</span>
+                                        <div class="font-bold text-slate-900 dark:text-white">13.00 - 15.30</div>
+                                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-semibold">Rekap</span>
                                     </div>
                                 </div>
                             </div>
@@ -262,25 +264,25 @@
     </section>
 
     <!-- SECTION 2: OFFICIAL BNI BRAND & SERVICE LOGO STRIP -->
-    <section class="py-12 border-y border-slate-200 bg-slate-50">
+    <section class="py-12 border-y border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Melayani Negeri, Kebanggaan Bangsa • Jaringan Layanan Resmi Agen BNI 46
             </p>
             <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-sm font-bold">
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> Bank BNI (Agen46)</span>
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> PLN Listrik</span>
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> BPJS Kesehatan</span>
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> DANA & ShopeePay</span>
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> GoPay & OVO</span>
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> Bea Meterai 10rb</span>
-                <span class="flex items-center gap-2 text-slate-700"><span class="w-2 h-2 rounded-full bg-[#005e6a]"></span> Pulsa All Operator</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> Bank BNI (Agen46)</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> PLN Listrik</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> BPJS Kesehatan</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> DANA & ShopeePay</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> GoPay & OVO</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> Bea Meterai 10rb</span>
+                <span class="flex items-center gap-2 text-slate-700 dark:text-slate-200"><span class="w-2 h-2 rounded-full bg-[#005e6a] dark:bg-teal-400"></span> Pulsa All Operator</span>
             </div>
         </div>
     </section>
 
     <!-- SECTION 3: DARK TEAL SEARCH/ESTIMATION BANNER (BNI Agen46 Identity) -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white dark:bg-slate-950">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="rounded-3xl bg-[#004750] text-white p-8 sm:p-12 text-center space-y-6 shadow-xl relative overflow-hidden border border-[#005e6a]">
                 
@@ -313,44 +315,44 @@
     </section>
 
     <!-- SECTION 4: ALTERNATING FEATURE ROWS (Zig-Zag Layout with BNI Context) -->
-    <section id="fitur" class="py-20 bg-slate-50/60 border-t border-slate-200">
+    <section id="fitur" class="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
             
             <div class="text-center max-w-2xl mx-auto space-y-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] bg-[#005e6a]/10 px-3 py-1 rounded-full border border-[#005e6a]/20">Standar Industri Perbankan</span>
-                <h2 class="text-3xl sm:text-4xl font-black text-slate-900">Operasional Mini Bank Sekolah yang Handal</h2>
-                <p class="text-slate-600 text-sm sm:text-base">Menerapkan prinsip kepercayaan & profesionalisme (#005e6a) serta semangat energi keterbukaan (#f15a23) dalam kurikulum Teaching Factory.</p>
+                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] dark:text-teal-300 bg-[#005e6a]/10 dark:bg-teal-950/70 px-3 py-1 rounded-full border border-[#005e6a]/20 dark:border-teal-800/60">Standar Industri Perbankan</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">Operasional Mini Bank Sekolah yang Handal</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base">Menerapkan prinsip kepercayaan & profesionalisme (#005e6a) serta semangat energi keterbukaan (#f15a23) dalam kurikulum Teaching Factory.</p>
             </div>
 
             <!-- Row 1: Text Left, Card Right -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 <div class="lg:col-span-6 space-y-4 text-left">
-                    <span class="text-xs font-bold uppercase text-[#005e6a]">01 // Layanan Terpadu Agen46</span>
-                    <h3 class="text-2xl sm:text-3xl font-bold text-slate-900">Multi-Channel POS Kasir Terstandar</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">
+                    <span class="text-xs font-bold uppercase text-[#005e6a] dark:text-teal-400">01 // Layanan Terpadu Agen46</span>
+                    <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Multi-Channel POS Kasir Terstandar</h3>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                         Mendukung input kilat seluruh spektrum layanan Agen46: setor tunai ke rekening BNI, transfer bank, tarik tunai kartu debit, pengisian e-wallet, dan pembelian token listrik dalam satu antarmuka kasir cepat.
                     </p>
-                    <div class="pt-2 text-xs font-bold text-[#005e6a] flex items-center gap-2">
+                    <div class="pt-2 text-xs font-bold text-[#005e6a] dark:text-teal-400 flex items-center gap-2">
                         <span>Pencatatan instan dengan validasi nomor rekening</span> &rarr;
                     </div>
                 </div>
-                <div class="lg:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-left space-y-3">
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase">
+                <div class="lg:col-span-6 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-left space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">
                         <span>Simulasi Input Kasir</span>
-                        <span class="text-[#005e6a]">Mitra Agen46</span>
+                        <span class="text-[#005e6a] dark:text-teal-400">Mitra Agen46</span>
                     </div>
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                        <div class="flex justify-between font-bold text-slate-900">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                        <div class="flex justify-between font-bold text-slate-900 dark:text-white">
                             <span>Layanan: Setor Tunai Rekening BNI</span>
                             <span>Rp 250.000</span>
                         </div>
-                        <div class="flex justify-between text-slate-500">
+                        <div class="flex justify-between text-slate-500 dark:text-slate-400">
                             <span>Biaya Admin Resmi Loket:</span>
                             <span>Rp 2.500</span>
                         </div>
-                        <div class="pt-2 border-t border-slate-200 flex justify-between font-black text-slate-900 text-sm">
+                        <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-black text-slate-900 dark:text-white text-sm">
                             <span>Total Diterima Kasir:</span>
-                            <span class="text-[#005e6a]">Rp 252.500</span>
+                            <span class="text-[#005e6a] dark:text-teal-400">Rp 252.500</span>
                         </div>
                     </div>
                 </div>
@@ -358,33 +360,33 @@
 
             <!-- Row 2: Card Left, Text Right -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-                <div class="lg:col-span-6 lg:order-1 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-left space-y-3">
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase">
+                <div class="lg:col-span-6 lg:order-1 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-left space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">
                         <span>Struk Thermal Standar BNI</span>
                         <span class="text-[#f15a23] font-bold">58mm / 80mm</span>
                     </div>
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1 font-mono text-[11px] text-slate-700">
-                        <div class="text-center font-bold text-slate-900 border-b border-dashed border-slate-300 pb-2 mb-2">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                        <div class="text-center font-bold text-slate-900 dark:text-white border-b border-dashed border-slate-300 dark:border-slate-600 pb-2 mb-2">
                             *** MITRA RESMI AGEN46 BNI ***<br>
                             UNIT MINI BANK SEKOLAH<br>
-                            <span class="text-[10px] text-slate-500">ID AGEN: 46-SMK-JKT-01</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">ID AGEN: 46-SMK-JKT-01</span>
                         </div>
                         <div class="flex justify-between"><span>No. Reff:</span><span>BNI-2026-88129</span></div>
                         <div class="flex justify-between"><span>Tanggal:</span><span>01/10/2026 10:14</span></div>
                         <div class="flex justify-between"><span>Layanan:</span><span>Setor Tunai BNI</span></div>
                         <div class="flex justify-between"><span>Petugas:</span><span>Kasir Siswa (Shift 1)</span></div>
-                        <div class="flex justify-between font-bold text-[#005e6a] pt-2 border-t border-dashed border-slate-300 mt-2">
+                        <div class="flex justify-between font-bold text-[#005e6a] dark:text-teal-400 pt-2 border-t border-dashed border-slate-300 dark:border-slate-600 mt-2">
                             <span>STATUS:</span><span>BERHASIL / LUNAS</span>
                         </div>
                     </div>
                 </div>
                 <div class="lg:col-span-6 lg:order-2 space-y-4 text-left">
-                    <span class="text-xs font-bold uppercase text-[#005e6a]">02 // Bukti Sah Industri</span>
-                    <h3 class="text-2xl sm:text-3xl font-bold text-slate-900">Pencetakan Bukti Struk Fisik Agen46</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">
+                    <span class="text-xs font-bold uppercase text-[#005e6a] dark:text-teal-400">02 // Bukti Sah Industri</span>
+                    <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Pencetakan Bukti Struk Fisik Agen46</h3>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                         Setiap transaksi yang berhasil otomatis menghasilkan struk resmi berformat perbankan dengan identitas Agen BNI 46 sekolah, nomor referensi unik, dan rincian transaksi sebagai bukti sah bagi siswa maupun guru.
                     </p>
-                    <div class="pt-2 text-xs font-bold text-[#005e6a] flex items-center gap-2">
+                    <div class="pt-2 text-xs font-bold text-[#005e6a] dark:text-teal-400 flex items-center gap-2">
                         <span>Memenuhi standar audit transaksi keuangan</span> &rarr;
                     </div>
                 </div>
@@ -393,32 +395,32 @@
             <!-- Row 3: Text Left, Card Right -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 <div class="lg:col-span-6 space-y-4 text-left">
-                    <span class="text-xs font-bold uppercase text-[#005e6a]">03 // Rekonsiliasi & Audit</span>
-                    <h3 class="text-2xl sm:text-3xl font-bold text-slate-900">Tutup Buku Harian (End of Day / EOD)</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">
+                    <span class="text-xs font-bold uppercase text-[#005e6a] dark:text-teal-400">03 // Rekonsiliasi & Audit</span>
+                    <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Tutup Buku Harian (End of Day / EOD)</h3>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                         Memastikan perputaran uang kas laci fisik selalu cocok 100% dengan mutasi sistem. Di akhir shift, siswa merekap fisik uang kas dan Guru Pembimbing melakukan verifikasi serta persetujuan resmi.
                     </p>
-                    <div class="pt-2 text-xs font-bold text-[#005e6a] flex items-center gap-2">
+                    <div class="pt-2 text-xs font-bold text-[#005e6a] dark:text-teal-400 flex items-center gap-2">
                         <span>Pencegahan selisih kas dan pembiasaan etika perbankan</span> &rarr;
                     </div>
                 </div>
-                <div class="lg:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-left space-y-3">
-                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase">
+                <div class="lg:col-span-6 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-left space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">
                         <span>Verifikasi EOD Pembimbing</span>
-                        <span class="text-emerald-700">Seimbang</span>
+                        <span class="text-emerald-700 dark:text-emerald-400">Seimbang</span>
                     </div>
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
-                            <span class="text-slate-500">Saldo Pembukuan Sistem:</span>
-                            <span class="font-bold text-slate-900">Rp 1.650.000</span>
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
+                            <span class="text-slate-500 dark:text-slate-400">Saldo Pembukuan Sistem:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">Rp 1.650.000</span>
                         </div>
-                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
-                            <span class="text-slate-500">Uang Fisik Laci Dihitung:</span>
-                            <span class="font-bold text-slate-900">Rp 1.650.000</span>
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
+                            <span class="text-slate-500 dark:text-slate-400">Uang Fisik Laci Dihitung:</span>
+                            <span class="font-bold text-slate-900 dark:text-white">Rp 1.650.000</span>
                         </div>
-                        <div class="flex justify-between items-center text-slate-900 font-bold pt-1">
+                        <div class="flex justify-between items-center text-slate-900 dark:text-white font-bold pt-1">
                             <span>Status Selisih Kas:</span>
-                            <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[11px]">✓ Rp 0 (Disetujui Guru)</span>
+                            <span class="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/60 text-[11px]">✓ Rp 0 (Disetujui Guru)</span>
                         </div>
                     </div>
                 </div>
@@ -428,51 +430,51 @@
     </section>
 
     <!-- SECTION 5: DAFTAR LAYANAN KATALOG (6-Card Grid with BNI Core Service Highlight) -->
-    <section id="layanan" class="py-20 bg-white border-t border-slate-200">
+    <section id="layanan" class="py-20 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] bg-[#005e6a]/10 px-3 py-1 rounded-full border border-[#005e6a]/20">Katalog Lengkap</span>
-                <h2 class="text-3xl sm:text-4xl font-black text-slate-900">Daftar Layanan Transaksi Sekolah</h2>
-                <p class="text-slate-600 text-sm">Layanan perbankan Agen BNI 46 dan pembayaran tagihan resmi siap dilayani di loket sekolah.</p>
+                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] dark:text-teal-300 bg-[#005e6a]/10 dark:bg-teal-950/70 px-3 py-1 rounded-full border border-[#005e6a]/20 dark:border-teal-800/60">Katalog Lengkap</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">Daftar Layanan Transaksi Sekolah</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm">Layanan perbankan Agen BNI 46 dan pembayaran tagihan resmi siap dilayani di loket sekolah.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                 
-                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">1</div>
-                    <h4 class="font-bold text-slate-900 text-lg">Setor & Tarik Tunai BNI</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Setor uang tabungan siswa ke rekening BNI atau tarik tunai via kartu debit resmi tanpa perlu keluar gerbang sekolah.</p>
+                <div class="p-7 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-900 dark:text-white">1</div>
+                    <h4 class="font-bold text-slate-900 dark:text-white text-lg">Setor & Tarik Tunai BNI</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Setor uang tabungan siswa ke rekening BNI atau tarik tunai via kartu debit resmi tanpa perlu keluar gerbang sekolah.</p>
                 </div>
 
-                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">2</div>
-                    <h4 class="font-bold text-slate-900 text-lg">Transfer Antar Bank</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Kirim uang langsung ke bank lain (BCA, BRI, Mandiri, BSI) secara real-time melalui jaringan interbank BNI.</p>
+                <div class="p-7 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-900 dark:text-white">2</div>
+                    <h4 class="font-bold text-slate-900 dark:text-white text-lg">Transfer Antar Bank</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Kirim uang langsung ke bank lain (BCA, BRI, Mandiri, BSI) secara real-time melalui jaringan interbank BNI.</p>
                 </div>
 
-                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">3</div>
-                    <h4 class="font-bold text-slate-900 text-lg">Top-Up Dompet Digital</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Pengisian saldo DANA, ShopeePay, GoPay, dan OVO cepat cukup sebutkan nomor HP terdaftar.</p>
+                <div class="p-7 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-900 dark:text-white">3</div>
+                    <h4 class="font-bold text-slate-900 dark:text-white text-lg">Top-Up Dompet Digital</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Pengisian saldo DANA, ShopeePay, GoPay, dan OVO cepat cukup sebutkan nomor HP terdaftar.</p>
                 </div>
 
-                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">4</div>
-                    <h4 class="font-bold text-slate-900 text-lg">Token Listrik & PLN</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Beli token listrik PLN prabayar (20rb s/d 1jt) atau pelunasan tagihan listrik pascabayar keluarga.</p>
+                <div class="p-7 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-900 dark:text-white">4</div>
+                    <h4 class="font-bold text-slate-900 dark:text-white text-lg">Token Listrik & PLN</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Beli token listrik PLN prabayar (20rb s/d 1jt) atau pelunasan tagihan listrik pascabayar keluarga.</p>
                 </div>
 
-                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">5</div>
-                    <h4 class="font-bold text-slate-900 text-lg">BPJS & Tagihan Utilitas</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Pembayaran iuran BPJS Kesehatan dan tagihan air PDAM tepat waktu untuk kemudahan warga sekolah.</p>
+                <div class="p-7 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-900 dark:text-white">5</div>
+                    <h4 class="font-bold text-slate-900 dark:text-white text-lg">BPJS & Tagihan Utilitas</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Pembayaran iuran BPJS Kesehatan dan tagihan air PDAM tepat waktu untuk kemudahan warga sekolah.</p>
                 </div>
 
-                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-900">6</div>
-                    <h4 class="font-bold text-slate-900 text-lg">Bea Meterai Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Penyediaan materai fisik resmi untuk kelengkapan berkas PKL / magang siswa dan dokumen administrasi.</p>
+                <div class="p-7 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-900 dark:text-white">6</div>
+                    <h4 class="font-bold text-slate-900 dark:text-white text-lg">Bea Meterai Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Penyediaan materai fisik resmi untuk kelengkapan berkas PKL / magang siswa dan dokumen administrasi.</p>
                 </div>
 
             </div>
@@ -481,11 +483,11 @@
     </section>
 
     <!-- SECTION 6: PRICING / TARIF 3-CARD (Featured BNI Teal Center Card) -->
-    <section id="tarif" class="py-20 bg-slate-50 border-t border-slate-200">
+    <section id="tarif" class="py-20 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 mb-16">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] bg-white px-3 py-1 rounded-full border border-[#005e6a]/20">Biaya Administrasi Resmi</span>
-            <h2 class="text-3xl sm:text-4xl font-black text-slate-900">Tarif Layanan Bersahabat & Transparan</h2>
-            <p class="text-slate-600 text-sm max-w-xl mx-auto">Tarif resmi standar Agen BNI 46 tanpa biaya tersembunyi untuk seluruh siswa dan guru.</p>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] dark:text-teal-300 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-[#005e6a]/20 dark:border-teal-800/60">Biaya Administrasi Resmi</span>
+            <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">Tarif Layanan Bersahabat & Transparan</h2>
+            <p class="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto">Tarif resmi standar Agen BNI 46 tanpa biaya tersembunyi untuk seluruh siswa dan guru.</p>
         </div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -517,48 +519,48 @@
                 </div>
 
                 <!-- Card 2 -->
-                <div class="rounded-3xl p-8 bg-white border border-slate-200 shadow-sm flex flex-col justify-between space-y-6">
+                <div class="rounded-3xl p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase text-slate-500">Kategori 02</span>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800">POPULER</span>
+                            <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Kategori 02</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">POPULER</span>
                         </div>
-                        <h4 class="text-xl font-bold text-slate-900">Dompet Digital & E-Wallet</h4>
+                        <h4 class="text-xl font-bold text-slate-900 dark:text-white">Dompet Digital & E-Wallet</h4>
                         <div class="flex items-baseline gap-1">
-                            <span class="text-3xl font-black text-slate-900">Rp 2.000</span>
-                            <span class="text-xs text-slate-500">/ transaksi</span>
+                            <span class="text-3xl font-black text-slate-900 dark:text-white">Rp 2.000</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">/ transaksi</span>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">Top-up saldo DANA, ShopeePay, GoPay, dan OVO masuk seketika.</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Top-up saldo DANA, ShopeePay, GoPay, dan OVO masuk seketika.</p>
                         
-                        <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600">
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> DANA, ShopeePay, GoPay, OVO</div>
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Pulsa Semua Operator Seluler</div>
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Saldo Masuk Hitungan Detik</div>
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] dark:text-teal-400 font-black">✓</span> DANA, ShopeePay, GoPay, OVO</div>
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] dark:text-teal-400 font-black">✓</span> Pulsa Semua Operator Seluler</div>
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] dark:text-teal-400 font-black">✓</span> Saldo Masuk Hitungan Detik</div>
                         </div>
                     </div>
-                    <a href="#simulasi" class="w-full py-3 rounded-full text-center text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">
+                    <a href="#simulasi" class="w-full py-3 rounded-full text-center text-xs font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                         Simulasi Transaksi
                     </a>
                 </div>
 
                 <!-- Card 3 -->
-                <div class="rounded-3xl p-8 bg-white border border-slate-200 shadow-sm flex flex-col justify-between space-y-6">
+                <div class="rounded-3xl p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
                     <div class="space-y-4">
-                        <div class="text-xs font-bold uppercase text-slate-500">Kategori 03</div>
-                        <h4 class="text-xl font-bold text-slate-900">Tagihan & Materai</h4>
+                        <div class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Kategori 03</div>
+                        <h4 class="text-xl font-bold text-slate-900 dark:text-white">Tagihan & Materai</h4>
                         <div class="flex items-baseline gap-1">
-                            <span class="text-3xl font-black text-slate-900">Rp 2.500</span>
-                            <span class="text-xs text-slate-500">+ Materai {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</span>
+                            <span class="text-3xl font-black text-slate-900 dark:text-white">Rp 2.500</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">+ Materai {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</span>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">Pembayaran tagihan listrik PLN, BPJS, PDAM, dan pembelian materai.</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">Pembayaran tagihan listrik PLN, BPJS, PDAM, dan pembelian materai.</p>
                         
-                        <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600">
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Token PLN & Pasca Bayar</div>
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Iuran BPJS Kesehatan</div>
-                            <div class="flex items-center gap-2"><span class="text-[#005e6a] font-black">✓</span> Materai Resmi Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</div>
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] dark:text-teal-400 font-black">✓</span> Token PLN & Pasca Bayar</div>
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] dark:text-teal-400 font-black">✓</span> Iuran BPJS Kesehatan</div>
+                            <div class="flex items-center gap-2"><span class="text-[#005e6a] dark:text-teal-400 font-black">✓</span> Materai Resmi Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</div>
                         </div>
                     </div>
-                    <a href="#simulasi" class="w-full py-3 rounded-full text-center text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">
+                    <a href="#simulasi" class="w-full py-3 rounded-full text-center text-xs font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                         Simulasi Transaksi
                     </a>
                 </div>
@@ -568,22 +570,22 @@
     </section>
 
     <!-- SECTION 7: INTERACTIVE FEE SIMULATOR -->
-    <section id="simulasi" class="py-20 bg-white border-t border-slate-200">
+    <section id="simulasi" class="py-20 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="text-center space-y-2 mb-12">
-                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] bg-[#005e6a]/10 px-3 py-1 rounded-full border border-[#005e6a]/20">Kalkulator Interaktif</span>
-                <h2 class="text-3xl font-black text-slate-900">Simulasi Biaya & Total Bayar</h2>
-                <p class="text-slate-600 text-sm">Hitung estimasi total yang perlu disiapkan sebelum datang ke loket Agen BNI 46 sekolah.</p>
+                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] dark:text-teal-300 bg-[#005e6a]/10 dark:bg-teal-950/70 px-3 py-1 rounded-full border border-[#005e6a]/20 dark:border-teal-800/60">Kalkulator Interaktif</span>
+                <h2 class="text-3xl font-black text-slate-900 dark:text-white">Simulasi Biaya & Total Bayar</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm">Hitung estimasi total yang perlu disiapkan sebelum datang ke loket Agen BNI 46 sekolah.</p>
             </div>
 
-            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200">
+            <div class="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center text-left">
                     
                     <div class="space-y-5">
                         <div>
-                            <label for="serviceType" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Pilih Layanan</label>
-                            <select id="serviceType" onchange="updateSimulation()" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-[#005e6a] focus:border-[#005e6a] block p-3.5 font-medium">
+                            <label for="serviceType" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Pilih Layanan</label>
+                            <select id="serviceType" onchange="updateSimulation()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl focus:ring-[#005e6a] dark:focus:ring-teal-500 focus:border-[#005e6a] dark:focus:border-teal-500 block p-3.5 font-medium">
                                 <option value="setor_bni" data-fee="2500" data-note="Layanan resmi Agen46. Bawa uang tunai & sebutkan 10 digit nomor rekening BNI tujuan.">Setor Tunai Rekening BNI (Agen46)</option>
                                 <option value="setor_antar_bank" data-fee="6500" data-note="Transfer ke bank lain (BCA, BRI, Mandiri) melalui jaringan BNI. Saldo masuk real-time.">Setor Tunai Antar Bank</option>
                                 <option value="tarik_bni" data-fee="3000" data-note="Tarik tunai lewat mesin EDC menggunakan kartu debit BNI Anda.">Tarik Tunai Kartu BNI</option>
@@ -596,39 +598,39 @@
                         </div>
 
                         <div>
-                            <label for="simAmount" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Nominal Uang Transaksi (Rp)</label>
+                            <label for="simAmount" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">Nominal Uang Transaksi (Rp)</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">Rp</span>
-                                <input type="number" id="simAmount" value="50000" min="5000" step="5000" oninput="updateSimulation()" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-[#005e6a] focus:border-[#005e6a] block pl-10 p-3.5 font-bold" placeholder="50.000">
+                                <input type="number" id="simAmount" value="50000" min="5000" step="5000" oninput="updateSimulation()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl focus:ring-[#005e6a] dark:focus:ring-teal-500 focus:border-[#005e6a] dark:focus:border-teal-500 block pl-10 p-3.5 font-bold" placeholder="50.000">
                             </div>
                         </div>
                     </div>
 
                     <!-- Live Calculation Card -->
-                    <div class="bg-white p-6 rounded-2xl border-2 border-[#005e6a]/20 shadow-2xs space-y-4">
-                        <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#005e6a]">
+                    <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border-2 border-[#005e6a]/20 dark:border-teal-800/60 shadow-2xs space-y-4">
+                        <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#005e6a] dark:text-teal-400">
                             <span>Kalkulasi Pembayaran</span>
                             <span class="text-[#f15a23]">Loket Agen46</span>
                         </div>
                         
                         <div class="space-y-2.5 text-sm">
-                            <div class="flex justify-between items-center text-slate-600">
+                            <div class="flex justify-between items-center text-slate-600 dark:text-slate-300">
                                 <span>Nominal Layanan:</span>
-                                <span id="resAmount" class="font-semibold text-slate-900">Rp 50.000</span>
+                                <span id="resAmount" class="font-semibold text-slate-900 dark:text-white">Rp 50.000</span>
                             </div>
-                            <div class="flex justify-between items-center text-slate-600">
+                            <div class="flex justify-between items-center text-slate-600 dark:text-slate-300">
                                 <span>Biaya Admin Loket:</span>
-                                <span id="resFee" class="font-bold text-[#005e6a]">Rp 2.500</span>
+                                <span id="resFee" class="font-bold text-[#005e6a] dark:text-teal-400">Rp 2.500</span>
                             </div>
-                            <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-base">
-                                <span class="font-bold text-slate-900">Total Dibayarkan:</span>
-                                <span id="resTotal" class="font-black text-[#005e6a] text-xl">Rp 52.500</span>
+                            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-base">
+                                <span class="font-bold text-slate-900 dark:text-white">Total Dibayarkan:</span>
+                                <span id="resTotal" class="font-black text-[#005e6a] dark:text-teal-400 text-xl">Rp 52.500</span>
                             </div>
                         </div>
 
-                        <div class="p-3.5 rounded-xl bg-[#005e6a]/5 border border-[#005e6a]/15 text-xs text-slate-700">
-                            <span class="font-bold text-[#005e6a] block mb-0.5">Petunjuk Transaksi:</span>
-                            <p id="resNote" class="text-slate-600 leading-relaxed">
+                        <div class="p-3.5 rounded-xl bg-[#005e6a]/5 dark:bg-teal-950/50 border border-[#005e6a]/15 dark:border-teal-800/50 text-xs text-slate-700 dark:text-slate-300">
+                            <span class="font-bold text-[#005e6a] dark:text-teal-400 block mb-0.5">Petunjuk Transaksi:</span>
+                            <p id="resNote" class="text-slate-600 dark:text-slate-300 leading-relaxed">
                                 Layanan resmi Agen46. Bawa uang tunai pas & sebutkan nomor rekening tujuan ke petugas loket.
                             </p>
                         </div>
@@ -641,60 +643,60 @@
     </section>
 
     <!-- SECTION 8: FAQ ACCORDION -->
-    <section id="faq" class="py-20 bg-slate-50 border-t border-slate-200">
+    <section id="faq" class="py-20 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 text-center">
             
             <div class="space-y-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] bg-white px-3 py-1 rounded-full border border-[#005e6a]/20">FAQ</span>
-                <h2 class="text-3xl font-black text-slate-900">Frequently Asked Questions</h2>
-                <p class="text-slate-600 text-sm">Pertanyaan umum seputar loket kemitraan Agen BNI 46 dan sistem SIAP46.</p>
+                <span class="text-xs font-bold uppercase tracking-wider text-[#005e6a] dark:text-teal-300 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-[#005e6a]/20 dark:border-teal-800/60">FAQ</span>
+                <h2 class="text-3xl font-black text-slate-900 dark:text-white">Frequently Asked Questions</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm">Pertanyaan umum seputar loket kemitraan Agen BNI 46 dan sistem SIAP46.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                <details class="group rounded-2xl bg-white border border-slate-200 p-5 [&_summary::-webkit-details-marker]:hidden" open>
-                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm">
+                <details class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 [&_summary::-webkit-details-marker]:hidden" open>
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 dark:text-white text-sm">
                         <span>Apa itu loket Mitra Agen BNI 46 di sekolah?</span>
-                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 transition-transform">
+                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 p-1.5 text-slate-500 dark:text-slate-400 group-open:-rotate-180 transition-transform">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </span>
                     </summary>
-                    <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+                    <p class="mt-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                         Loket Agen46 adalah kemitraan resmi dengan PT Bank Negara Indonesia (Persero) Tbk untuk menghadirkan layanan perbankan langsung di sekolah. Dikelola oleh siswa kejuruan sebagai sarana praktik kerja nyata (Teaching Factory) dengan pengawasan guru.
                     </p>
                 </details>
 
-                <details class="group rounded-2xl bg-white border border-slate-200 p-5 [&_summary::-webkit-details-marker]:hidden">
-                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm">
+                <details class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 dark:text-white text-sm">
                         <span>Apakah siswa non-nasabah BNI bisa bertransaksi?</span>
-                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 transition-transform">
+                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 p-1.5 text-slate-500 dark:text-slate-400 group-open:-rotate-180 transition-transform">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </span>
                     </summary>
-                    <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+                    <p class="mt-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                         Tentu saja bisa! Seluruh transaksi seperti pembayaran token PLN, iuran BPJS, top-up e-wallet (DANA, ShopeePay, GoPay), pulsa, dan pembelian meterai dapat dilayani langsung dengan pembayaran tunai (cash).
                     </p>
                 </details>
 
-                <details class="group rounded-2xl bg-white border border-slate-200 p-5 [&_summary::-webkit-details-marker]:hidden">
-                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm">
+                <details class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 dark:text-white text-sm">
                         <span>Apakah setiap transaksi langsung dapat struk fisik?</span>
-                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 transition-transform">
+                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 p-1.5 text-slate-500 dark:text-slate-400 group-open:-rotate-180 transition-transform">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </span>
                     </summary>
-                    <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+                    <p class="mt-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                         Ya. Loket kasir dilengkapi printer thermal standar perbankan yang otomatis menerbitkan struk fisik berisi identitas Agen46, nomor referensi sah, waktu transaksi, dan nominal pembayaran.
                     </p>
                 </details>
 
-                <details class="group rounded-2xl bg-white border border-slate-200 p-5 [&_summary::-webkit-details-marker]:hidden">
-                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm">
+                <details class="group rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 dark:text-white text-sm">
                         <span>Kapan waktu operasional loket di sekolah?</span>
-                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 transition-transform">
+                        <span class="ml-4 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 p-1.5 text-slate-500 dark:text-slate-400 group-open:-rotate-180 transition-transform">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </span>
                     </summary>
-                    <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+                    <p class="mt-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                         Loket beroperasi Senin - Jumat pukul 07.30 - 15.30 WIB di Business Center Lantai 1. Siswa dapat bertransaksi sebelum pelajaran dimulai, saat istirahat 1 & 2, atau setelah jam pulang sekolah.
                     </p>
                 </details>

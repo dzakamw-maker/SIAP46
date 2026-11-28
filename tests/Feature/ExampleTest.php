@@ -73,4 +73,46 @@ class ExampleTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Input Transaksi');
     }
+
+    public function test_dark_mode_toggle_and_theme_script_render_across_layouts(): void
+    {
+        $guestHome = $this->get('/');
+        $guestHome->assertStatus(200);
+        $guestHome->assertSee('data-theme-toggle', false);
+        $guestHome->assertSee('window.toggleTheme', false);
+        $guestHome->assertSee('dark:bg-slate-950', false);
+
+        $login = $this->get('/login');
+        $login->assertStatus(200);
+        $login->assertSee('data-theme-toggle', false);
+        $login->assertSee('dark:bg-zinc-900', false);
+
+        $adminRole = Role::create(['name' => 'Admin']);
+        $admin = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Dark',
+            'username' => 'admindark',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $adminResponse = $this->actingAs($admin)->get('/');
+        $adminResponse->assertStatus(200);
+        $adminResponse->assertSee('data-theme-toggle', false);
+        $adminResponse->assertSee('dark:bg-zinc-900', false);
+
+        $kasirRole = Role::create(['name' => 'Kasir']);
+        $kasir = User::create([
+            'role_id' => $kasirRole->id,
+            'full_name' => 'Kasir Dark',
+            'username' => 'kasirdark',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $kasirResponse = $this->actingAs($kasir)->get('/');
+        $kasirResponse->assertStatus(200);
+        $kasirResponse->assertSee('data-theme-toggle', false);
+        $kasirResponse->assertSee('dark:bg-zinc-900', false);
+    }
 }

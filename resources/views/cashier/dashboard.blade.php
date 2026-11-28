@@ -4,9 +4,9 @@
 
 @section('cashier_content')
 @if(session('success'))
-<div class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-center justify-between shadow-sm">
+<div class="mb-6 p-4 rounded-xl bg-green-50 dark:bg-emerald-500/10 border border-green-200 dark:border-emerald-500/25 text-green-700 dark:text-emerald-300 text-sm flex items-center justify-between shadow-sm">
     <div class="flex items-center">
-        <svg class="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 mr-3 text-green-500 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
         <span class="font-medium">{{ session('success') }}</span>
@@ -15,14 +15,14 @@
 @endif
 
 @if($errors->any())
-<div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm shadow-sm">
+<div class="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 text-red-700 dark:text-red-300 text-sm shadow-sm">
     <div class="flex items-center mb-1 font-medium">
-        <svg class="w-5 h-5 mr-2 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 mr-2 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <span>Gagal memproses transaksi:</span>
     </div>
-    <ul class="list-disc list-inside space-y-1 text-xs text-red-600 ml-7">
+    <ul class="list-disc list-inside space-y-1 text-xs text-red-600 dark:text-red-400 ml-7">
         @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
         @endforeach
@@ -32,15 +32,15 @@
 
 @if($hasOpeningBalance)
 <!-- Banner Loket Aktif -->
-<div class="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-200 text-emerald-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+<div class="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200 dark:border-emerald-500/25 text-emerald-900 dark:text-emerald-200 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
     <div class="flex items-center gap-3">
         <span class="relative flex h-3 w-3">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
         </span>
         <div>
-            <span class="font-bold text-emerald-800">Loket Hari Ini Aktif</span>
-            <span class="text-xs text-emerald-700 ml-1">
+            <span class="font-bold text-emerald-800 dark:text-emerald-300">Loket Hari Ini Aktif</span>
+            <span class="text-xs text-emerald-700 dark:text-emerald-300/90 ml-1">
                 • Dibuka oleh: <strong class="font-semibold">{{ $openingBalance->openedBy?->full_name ?? $openingBalance->openedBy?->username ?? 'Kasir' }}</strong>
                 • Saldo Awal BNI: <strong class="font-semibold">Rp {{ number_format($openingBalance->opening_bni_balance, 0, ',', '.') }}</strong>
                 @if($openingBalance->opening_cash_balance > 0)
@@ -50,21 +50,21 @@
         </div>
     </div>
     <div class="flex items-center gap-2 text-xs">
-        <a href="{{ route('kasir.eod') }}" class="font-semibold text-emerald-700 hover:text-emerald-800 hover:underline">
+        <a href="{{ route('kasir.eod') }}" class="font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-emerald-200 hover:underline">
             Rekap EOD &rarr;
         </a>
     </div>
 </div>
 @else
 <!-- Banner Peringatan Loket Belum Dibuka -->
-<div class="mb-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+<div class="mb-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/25 text-amber-900 dark:text-amber-200 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
     <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <div>
-            <span class="font-bold text-amber-800">Loket Kasir Belum Dibuka Hari Ini</span>
-            <p class="text-xs text-amber-700 mt-0.5">
+            <span class="font-bold text-amber-800 dark:text-amber-300">Loket Kasir Belum Dibuka Hari Ini</span>
+            <p class="text-xs text-amber-700 dark:text-amber-200/80 mt-0.5">
                 Transaksi belum dapat diproses. Cukup salah satu kasir yang bertugas membuka loket dengan menginput saldo awal Agen BNI pagi ini.
             </p>
         </div>
@@ -80,32 +80,32 @@
 
 @if($hasAttendance)
 <!-- Banner Status Presensi Kasir Aktif -->
-<div class="mb-6 p-4 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+<div class="mb-6 p-4 rounded-xl bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/25 text-teal-900 dark:text-teal-200 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
     <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
-            <span class="font-bold text-teal-800">Presensi Shift Hari Ini Tercatat</span>
-            <p class="text-xs text-teal-700 mt-0.5">
+            <span class="font-bold text-teal-800 dark:text-teal-300">Presensi Shift Hari Ini Tercatat</span>
+            <p class="text-xs text-teal-700 dark:text-teal-200/80 mt-0.5">
                 Catatan Shift: <strong>{{ $todayAttendance->student_note }}</strong>
             </p>
         </div>
     </div>
-    <button type="button" onclick="openAttendanceModal()" class="inline-flex items-center justify-center px-3.5 py-1.5 bg-white hover:bg-teal-100 text-teal-700 border border-teal-200 text-xs font-semibold rounded-lg shadow-2xs transition-colors whitespace-nowrap cursor-pointer">
+    <button type="button" onclick="openAttendanceModal()" class="inline-flex items-center justify-center px-3.5 py-1.5 bg-white dark:bg-zinc-800 hover:bg-teal-100 dark:hover:bg-zinc-700 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30 text-xs font-semibold rounded-lg shadow-2xs transition-colors whitespace-nowrap cursor-pointer">
         Ubah Catatan Shift
     </button>
 </div>
 @else
 <!-- Banner Peringatan Wajib Presensi -->
-<div class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+<div class="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/25 text-blue-900 dark:text-blue-200 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
     <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
         <div>
-            <span class="font-bold text-blue-800">Presensi Shift Anda Belum Tercatat Hari Ini</span>
-            <p class="text-xs text-blue-700 mt-0.5">
+            <span class="font-bold text-blue-800 dark:text-blue-300">Presensi Shift Anda Belum Tercatat Hari Ini</span>
+            <p class="text-xs text-blue-700 dark:text-blue-200/80 mt-0.5">
                 Setiap kasir wajib mencatat kehadiran &amp; catatan shift sebelum dapat memproses transaksi.
             </p>
         </div>
@@ -119,10 +119,10 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Form Input Transaksi -->
     <div class="col-span-2">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-800 text-lg">Input Transaksi Baru</h3>
-                <span class="text-xs text-gray-500 bg-white border border-gray-200 px-2.5 py-1 rounded-full font-medium">Loket Kasir</span>
+        <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 dark:text-zinc-100 text-lg">Input Transaksi Baru</h3>
+                <span class="text-xs text-gray-500 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-2.5 py-1 rounded-full font-medium">Loket Kasir</span>
             </div>
             <div class="p-6">
                 <form id="transactionForm" action="{{ route('kasir.transactions.store') }}" method="POST" onsubmit="return validateTransaction(event)">
@@ -139,8 +139,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <!-- Jenis Transaksi -->
                         <div id="transactionTypeWrapper" class="transition-all {{ $initialIsMaterai ? 'md:col-span-2' : '' }}">
-                            <label for="transaction_type_id" class="block mb-2 text-sm font-medium text-gray-700">Jenis Transaksi</label>
-                            <select name="transaction_type_id" id="transaction_type_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('transaction_type_id') border-red-500 @enderror" required>
+                            <label for="transaction_type_id" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">Jenis Transaksi</label>
+                            <select name="transaction_type_id" id="transaction_type_id" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('transaction_type_id') border-red-500 @enderror" required>
                                 @foreach($types as $type)
                                     <option value="{{ $type->id }}" data-code="{{ strtolower($type->code) }}" {{ $selectedTypeId == $type->id ? 'selected' : '' }}>
                                         {{ $type->name }}
@@ -148,16 +148,16 @@
                                 @endforeach
                             </select>
                             @error('transaction_type_id')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <!-- Identitas Customer -->
                         <div class="relative transition-all {{ $initialIsMaterai ? 'hidden' : '' }}" id="customerIdentifierWrapper">
-                            <label for="customer_identifier" class="flex items-center mb-2 text-sm font-medium text-gray-700">
+                            <label for="customer_identifier" class="flex items-center mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
                                 <span id="identifierTitle">{{ $initialIsSpp ? 'Identitas Siswa (NIS/NISN)' : 'Identitas Customer' }}</span>
-                                <span class="text-xs text-gray-400 font-normal ml-1" id="identifierHint">{{ $initialIsSpp ? '(Nomor VA: 98844565 + NIS)' : '(No. Rek / No. HP / IDPEL)' }}</span>
-                                <span id="defaultBadge" class="hidden ml-2 text-[10px] text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full font-medium">Default</span>
+                                <span class="text-xs text-gray-400 dark:text-zinc-500 font-normal ml-1" id="identifierHint">{{ $initialIsSpp ? '(Nomor VA: 98844565 + NIS)' : '(No. Rek / No. HP / IDPEL)' }}</span>
+                                <span id="defaultBadge" class="hidden ml-2 text-[10px] text-green-700 dark:text-emerald-300 bg-green-50 dark:bg-emerald-500/15 border border-green-200 dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">Default</span>
                             </label>
 
                             @php
@@ -168,43 +168,43 @@
                             @endphp
 
                             <div class="relative flex rounded-lg">
-                                <span id="sppPrefixAddon" class="items-center px-3.5 rounded-l-lg border border-r-0 border-gray-300 bg-gray-100 text-gray-700 font-mono text-sm font-bold select-none tracking-wider transition-all {{ $initialIsSpp ? 'inline-flex' : 'hidden' }}" style="{{ $initialIsSpp ? 'display: inline-flex;' : 'display: none !important;' }}">
+                                <span id="sppPrefixAddon" class="items-center px-3.5 rounded-l-lg border border-r-0 border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-200 font-mono text-sm font-bold select-none tracking-wider transition-all {{ $initialIsSpp ? 'inline-flex' : 'hidden' }}" style="{{ $initialIsSpp ? 'display: inline-flex;' : 'display: none !important;' }}">
                                     98844565
                                 </span>
-                                <input type="text" name="customer_identifier" id="customer_identifier" value="{{ $displayIdent }}" autocomplete="off" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 transition-all {{ $initialIsSpp ? 'rounded-r-lg font-mono' : 'rounded-lg' }} @error('customer_identifier') border-red-500 @enderror" placeholder="{{ $initialIsSpp ? 'Ketik NIS siswa (contoh: 12511177)...' : 'Ketik nomor / cari identitas...' }}" {{ $initialIsMaterai ? '' : 'required' }}>
+                                <input type="text" name="customer_identifier" id="customer_identifier" value="{{ $displayIdent }}" autocomplete="off" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 transition-all {{ $initialIsSpp ? 'rounded-r-lg font-mono' : 'rounded-lg' }} @error('customer_identifier') border-red-500 @enderror" placeholder="{{ $initialIsSpp ? 'Ketik NIS siswa (contoh: 12511177)...' : 'Ketik nomor / cari identitas...' }}" {{ $initialIsMaterai ? '' : 'required' }}>
                             </div>
 
-                            <div id="identifierSuggestions" class="absolute left-0 right-0 z-30 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto divide-y divide-gray-100"></div>
+                            <div id="identifierSuggestions" class="absolute left-0 right-0 z-30 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto divide-y divide-gray-100 dark:divide-zinc-800"></div>
                             @error('customer_identifier')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
 
                     <!-- Nama Customer -->
                     <div class="relative mb-4">
-                        <label for="customer_name" id="nameLabel" class="block mb-2 text-sm font-medium text-gray-700">{{ $initialIsSpp ? 'Nama Siswa' : 'Nama Customer' }}</label>
-                        <input type="text" name="customer_name" id="customer_name" value="{{ old('customer_name') }}" autocomplete="off" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('customer_name') border-red-500 @enderror" placeholder="{{ $initialIsSpp ? 'Nama siswa otomatis terisi atau ketik manual...' : 'Nama otomatis terisi atau ketik manual...' }}" required>
-                        <div id="nameSuggestions" class="absolute left-0 right-0 z-30 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto divide-y divide-gray-100"></div>
+                        <label for="customer_name" id="nameLabel" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">{{ $initialIsSpp ? 'Nama Siswa' : 'Nama Customer' }}</label>
+                        <input type="text" name="customer_name" id="customer_name" value="{{ old('customer_name') }}" autocomplete="off" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('customer_name') border-red-500 @enderror" placeholder="{{ $initialIsSpp ? 'Nama siswa otomatis terisi atau ketik manual...' : 'Nama otomatis terisi atau ketik manual...' }}" required>
+                        <div id="nameSuggestions" class="absolute left-0 right-0 z-30 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto divide-y divide-gray-100 dark:divide-zinc-800"></div>
                         @error('customer_name')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Regular: Nominal Uang & Biaya Admin -->
                     <div id="regularAmountWrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 {{ $initialIsMaterai ? 'hidden' : '' }}">
                         <div>
-                            <label for="amount" id="amountLabel" class="block mb-2 text-sm font-medium text-gray-700">{{ $initialIsSpp ? 'Nominal SPP (Rp)' : 'Nominal Uang (Rp)' }}</label>
-                            <input type="number" name="amount" id="amount" value="{{ old('amount') }}" min="0" step="any" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('amount') border-red-500 @enderror" placeholder="0" {{ $initialIsMaterai ? '' : 'required' }}>
+                            <label for="amount" id="amountLabel" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">{{ $initialIsSpp ? 'Nominal SPP (Rp)' : 'Nominal Uang (Rp)' }}</label>
+                            <input type="number" name="amount" id="amount" value="{{ old('amount') }}" min="0" step="any" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('amount') border-red-500 @enderror" placeholder="0" {{ $initialIsMaterai ? '' : 'required' }}>
                             @error('amount')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
-                            <label for="admin_fee" class="block mb-2 text-sm font-medium text-gray-700">Biaya Admin (Rp)</label>
-                            <input type="number" name="admin_fee" id="admin_fee" value="{{ old('admin_fee') }}" min="0" step="any" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('admin_fee') border-red-500 @enderror" placeholder="0">
+                            <label for="admin_fee" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">Biaya Admin (Rp)</label>
+                            <input type="number" name="admin_fee" id="admin_fee" value="{{ old('admin_fee') }}" min="0" step="any" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('admin_fee') border-red-500 @enderror" placeholder="0">
                             @error('admin_fee')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -212,50 +212,50 @@
                     <!-- Materai: Jumlah Pembelian & Harga Satuan -->
                     <div id="materaiAmountWrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 {{ $initialIsMaterai ? '' : 'hidden' }}">
                         <div>
-                            <label for="stamp_quantity" class="block mb-2 text-sm font-medium text-gray-700">
+                            <label for="stamp_quantity" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
                                 <span>Jumlah Pembelian</span>
-                                <span class="text-xs text-gray-400 font-normal ml-1">(pcs)</span>
+                                <span class="text-xs text-gray-400 dark:text-zinc-500 font-normal ml-1">(pcs)</span>
                             </label>
-                            <input type="number" name="stamp_quantity" id="stamp_quantity" value="{{ old('stamp_quantity') }}" min="1" step="1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('stamp_quantity') border-red-500 @enderror" placeholder="0" {{ $initialIsMaterai ? 'required' : '' }}>
+                            <input type="number" name="stamp_quantity" id="stamp_quantity" value="{{ old('stamp_quantity') }}" min="1" step="1" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('stamp_quantity') border-red-500 @enderror" placeholder="0" {{ $initialIsMaterai ? 'required' : '' }}>
                             @error('stamp_quantity')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
-                            <label for="stamp_price" class="block mb-2 text-sm font-medium text-gray-700">
+                            <label for="stamp_price" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
                                 <span>Harga Jual per pcs (Rp)</span>
-                                <span class="text-xs text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded font-medium ml-1">Default Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</span>
+                                <span class="text-xs text-orange-600 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 px-1.5 py-0.5 rounded font-medium ml-1">Default Rp {{ number_format($stampSellingPrice ?? 11000, 0, ',', '.') }}</span>
                             </label>
-                            <input type="number" name="stamp_price" id="stamp_price" value="{{ old('stamp_price', $stampSellingPrice ?? 11000) }}" min="0" step="any" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('stamp_price') border-red-500 @enderror" placeholder="{{ $stampSellingPrice ?? 11000 }}">
+                            <input type="number" name="stamp_price" id="stamp_price" value="{{ old('stamp_price', $stampSellingPrice ?? 11000) }}" min="0" step="any" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 @error('stamp_price') border-red-500 @enderror" placeholder="{{ $stampSellingPrice ?? 11000 }}">
                             @error('stamp_price')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
 
                     <!-- Catatan Tambahan (Opsional) -->
                     <div class="mb-4">
-                        <label for="notes" class="block mb-2 text-sm font-medium text-gray-700">Catatan <span class="text-xs text-gray-400 font-normal">(Opsional)</span></label>
-                        <input type="text" name="notes" id="notes" value="{{ old('notes') }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5" placeholder="{{ $initialIsSpp ? 'Contoh: SPP Bulan Oktober / Kelas XI RPL 1' : 'Contoh: Transaksi reguler / transfer via kartu BNI' }}">
+                        <label for="notes" class="block mb-2 text-sm font-medium text-gray-700 dark:text-zinc-300">Catatan <span class="text-xs text-gray-400 dark:text-zinc-500 font-normal">(Opsional)</span></label>
+                        <input type="text" name="notes" id="notes" value="{{ old('notes') }}" class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5" placeholder="{{ $initialIsSpp ? 'Contoh: SPP Bulan Oktober / Kelas XI RPL 1' : 'Contoh: Transaksi reguler / transfer via kartu BNI' }}">
                     </div>
 
                     <!-- Total Pembayaran Banner -->
-                    <div class="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-100 shadow-2xs">
+                    <div class="mb-6 p-4 bg-orange-50 dark:bg-orange-500/10 rounded-xl border border-orange-100 dark:border-orange-500/25 shadow-2xs">
                         <div class="flex justify-between items-center">
                             <div>
-                                <span class="text-xs text-orange-700 uppercase tracking-wider font-semibold block">Total Pembayaran Customer</span>
-                                <span id="totalSubtitle" class="text-xs text-gray-500 font-normal">{{ $initialIsMaterai ? '(Jumlah Pembelian × Harga Satuan)' : '(Nominal + Biaya Admin)' }}</span>
+                                <span class="text-xs text-orange-700 dark:text-orange-300 uppercase tracking-wider font-semibold block">Total Pembayaran Customer</span>
+                                <span id="totalSubtitle" class="text-xs text-gray-500 dark:text-zinc-400 font-normal">{{ $initialIsMaterai ? '(Jumlah Pembelian × Harga Satuan)' : '(Nominal + Biaya Admin)' }}</span>
                             </div>
-                            <span id="totalDisplay" class="text-2xl font-black text-orange-600">Rp 0</span>
+                            <span id="totalDisplay" class="text-2xl font-black text-orange-600 dark:text-orange-400">Rp 0</span>
                         </div>
                     </div>
 
                     <div class="flex justify-end space-x-3">
-                        <button type="reset" onclick="setTimeout(() => { updateTotal(); syncTransactionType(); }, 50)" class="text-gray-600 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 transition-colors">
+                        <button type="reset" onclick="setTimeout(() => { updateTotal(); syncTransactionType(); }, 50)" class="text-gray-600 dark:text-zinc-200 bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:focus:ring-zinc-700 rounded-lg border border-gray-200 dark:border-zinc-700 text-sm font-medium px-5 py-2.5 transition-colors cursor-pointer">
                             Batal
                         </button>
                         @if(! $hasOpeningBalance)
-                        <button type="button" onclick="openOpeningBalanceModal()" class="text-white bg-amber-600 hover:bg-amber-700 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all flex items-center gap-1.5">
+                        <button type="button" onclick="openOpeningBalanceModal()" class="text-white bg-amber-600 hover:bg-amber-700 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
@@ -269,7 +269,7 @@
                             Isi Presensi Dahulu
                         </button>
                         @else
-                        <button type="submit" class="text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all hover:scale-[1.01]">
+                        <button type="submit" class="text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-6 py-2.5 shadow-sm transition-all hover:scale-[1.01] cursor-pointer">
                             Proses Transaksi
                         </button>
                         @endif
@@ -282,41 +282,41 @@
     <!-- Info Sidebar & Transaksi Terakhir -->
     <div class="col-span-1 space-y-6">
         <!-- Status Stok Materai -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h3 class="text-sm font-medium text-gray-500 mb-1">Status Stok Materai</h3>
+        <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 p-5">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-zinc-400 mb-1">Status Stok Materai</h3>
             <div class="flex justify-between items-end mb-2">
-                <p class="text-2xl font-bold text-gray-800">{{ $stampsStock }} <span class="text-sm font-normal text-gray-500">pcs</span></p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-zinc-100">{{ $stampsStock }} <span class="text-sm font-normal text-gray-500 dark:text-zinc-400">pcs</span></p>
                 @if($stampsStock <= 0)
-                    <span class="text-xs text-red-600 bg-red-50 border border-red-200 font-medium px-2 py-0.5 rounded-full">Stok Habis</span>
+                    <span class="text-xs text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-500/15 border border-red-200 dark:border-red-500/30 font-medium px-2 py-0.5 rounded-full">Stok Habis</span>
                 @else
-                    <span class="text-xs text-green-600 bg-green-50 border border-green-200 font-medium px-2 py-0.5 rounded-full">Tersedia</span>
+                    <span class="text-xs text-green-600 dark:text-emerald-300 bg-green-50 dark:bg-emerald-500/15 border border-green-200 dark:border-emerald-500/30 font-medium px-2 py-0.5 rounded-full">Tersedia</span>
                 @endif
             </div>
-            <a href="{{ route('kasir.stamps') }}" class="text-xs text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1">
+            <a href="{{ route('kasir.stamps') }}" class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium flex items-center gap-1">
                 Restock Materai &rarr;
             </a>
         </div>
 
         <!-- Transaksi Hari Ini -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 class="font-semibold text-gray-800 text-sm">Riwayat Hari Ini</h3>
-                <span class="text-xs font-bold text-orange-600 bg-orange-100/60 px-2 py-0.5 rounded-full">{{ $todayTransactions->count() }} Transaksi</span>
+        <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
+            <div class="px-5 py-3 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 flex justify-between items-center">
+                <h3 class="font-semibold text-gray-800 dark:text-zinc-100 text-sm">Riwayat Hari Ini</h3>
+                <span class="text-xs font-bold text-orange-600 dark:text-orange-300 bg-orange-100/60 dark:bg-orange-500/15 px-2 py-0.5 rounded-full">{{ $todayTransactions->count() }} Transaksi</span>
             </div>
-            <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+            <div class="divide-y divide-gray-100 dark:divide-zinc-800 max-h-96 overflow-y-auto">
                 @forelse($todayTransactions as $tx)
-                    <div class="p-3.5 text-xs hover:bg-gray-50 transition-colors">
+                    <div class="p-3.5 text-xs hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
                         <div class="flex justify-between items-start mb-1">
-                            <span class="font-bold text-gray-800">#{{ $tx->transaction_number }} • {{ $tx->transactionType?->name }}</span>
-                            <span class="font-bold text-orange-600">Rp {{ number_format($tx->total_payment, 0, ',', '.') }}</span>
+                            <span class="font-bold text-gray-800 dark:text-zinc-100">#{{ $tx->transaction_number }} • {{ $tx->transactionType?->name }}</span>
+                            <span class="font-bold text-orange-600 dark:text-orange-400">Rp {{ number_format($tx->total_payment, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between text-gray-500 text-[11px]">
+                        <div class="flex justify-between text-gray-500 dark:text-zinc-400 text-[11px]">
                             <span class="truncate max-w-[140px]">{{ $tx->customer?->customer_name }} ({{ $tx->customer?->customer_identifier }})</span>
-                            <span class="text-gray-400">{{ $tx->created_at->format('H:i') }}</span>
+                            <span class="text-gray-400 dark:text-zinc-500">{{ $tx->created_at->format('H:i') }}</span>
                         </div>
                     </div>
                 @empty
-                    <div class="p-6 text-center text-sm text-gray-400">Belum ada transaksi hari ini</div>
+                    <div class="p-6 text-center text-sm text-gray-400 dark:text-zinc-500">Belum ada transaksi hari ini</div>
                 @endforelse
             </div>
         </div>
@@ -324,26 +324,26 @@
 </div>
 
 <!-- Modal Verifikasi Identitas Default Customer -->
-<div id="defaultVerificationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-xs transition-opacity p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-gray-100">
+<div id="defaultVerificationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 dark:bg-black/75 backdrop-blur-xs transition-opacity p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-gray-100 dark:border-zinc-800">
         <div class="p-6">
-            <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-4">
+            <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-4">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
             </div>
             
-            <h3 class="text-lg font-bold text-gray-900 text-center">Verifikasi Identitas Customer</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-zinc-100 text-center">Verifikasi Identitas Customer</h3>
             
-            <div class="mt-3 text-center text-sm text-gray-600 space-y-2">
+            <div class="mt-3 text-center text-sm text-gray-600 dark:text-zinc-300 space-y-2">
                 <p>
-                    Customer <span id="modalCustomerName" class="font-bold text-gray-800"></span> belum memiliki <strong>identitas default</strong> untuk jenis transaksi ini.
+                    Customer <span id="modalCustomerName" class="font-bold text-gray-800 dark:text-white"></span> belum memiliki <strong>identitas default</strong> untuk jenis transaksi ini.
                 </p>
-                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 text-xs flex justify-between items-center">
-                    <span class="text-gray-500">Nomor / Identitas:</span>
-                    <span id="modalCustomerIdent" class="font-bold text-orange-600 font-mono text-sm"></span>
+                <div class="p-3 bg-gray-50 dark:bg-zinc-800/70 rounded-lg border border-gray-200 dark:border-zinc-700 text-xs flex justify-between items-center">
+                    <span class="text-gray-500 dark:text-zinc-400">Nomor / Identitas:</span>
+                    <span id="modalCustomerIdent" class="font-bold text-orange-600 dark:text-orange-400 font-mono text-sm"></span>
                 </div>
-                <p class="text-xs text-gray-500 leading-relaxed text-left bg-orange-50/60 p-3 rounded-lg border border-orange-100">
+                <p class="text-xs text-gray-500 dark:text-zinc-300 leading-relaxed text-left bg-orange-50/60 dark:bg-orange-500/10 p-3 rounded-lg border border-orange-100 dark:border-orange-500/25">
                     💡 <strong>Jadikan Default?</strong><br>
                     • <strong>Ya, Jadikan Default</strong>: Nomor ini akan otomatis disarankan saat nama customer diketik pada transaksi berikutnya.<br>
                     • <strong>Tidak</strong>: Nomor ini hanya dipakai untuk transaksi kali ini (misal kirim uang ke orang lain) dan tidak akan disarankan di pencarian.
@@ -355,10 +355,10 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     Ya, Jadikan Identitas Default
                 </button>
-                <button type="button" id="btnDontSetDefault" onclick="submitWithDefault('0')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-xl text-sm border border-gray-200 transition-colors cursor-pointer">
+                <button type="button" id="btnDontSetDefault" onclick="submitWithDefault('0')" class="w-full bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 font-medium py-2.5 px-4 rounded-xl text-sm border border-gray-200 dark:border-zinc-700 transition-colors cursor-pointer">
                     Tidak (Hanya untuk Transaksi Ini)
                 </button>
-                <button type="button" id="btnCancelModal" onclick="closeDefaultModal()" class="mt-1 text-xs text-gray-400 hover:text-gray-600 text-center py-1 cursor-pointer">
+                <button type="button" id="btnCancelModal" onclick="closeDefaultModal()" class="mt-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 text-center py-1 cursor-pointer">
                     Batal & Perbaiki Input
                 </button>
             </div>
@@ -367,8 +367,8 @@
 </div>
 
 <!-- Modal Input Saldo Awal (Buka Loket Hari Ini) -->
-<div id="openingBalanceModal" class="fixed inset-0 z-50 flex items-center justify-center {{ $hasOpeningBalance ? 'hidden' : '' }} bg-black/50 backdrop-blur-xs transition-opacity p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100">
+<div id="openingBalanceModal" class="fixed inset-0 z-50 flex items-center justify-center {{ $hasOpeningBalance ? 'hidden' : '' }} bg-black/50 dark:bg-black/75 backdrop-blur-xs transition-opacity p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 dark:border-zinc-800">
         <div class="px-6 py-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
@@ -381,7 +381,7 @@
                     <p class="text-xs text-orange-100">Input Saldo Awal Hari Ini ({{ now()->translatedFormat('l, d F Y') }})</p>
                 </div>
             </div>
-            <button type="button" onclick="closeOpeningBalanceModal()" class="text-white/80 hover:text-white rounded-lg p-1.5 hover:bg-white/10 transition-colors">
+            <button type="button" onclick="closeOpeningBalanceModal()" class="text-white/80 hover:text-white rounded-lg p-1.5 hover:bg-white/10 transition-colors cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -389,8 +389,8 @@
         <form action="{{ route('kasir.opening-balance.store') }}" method="POST" class="p-6">
             @csrf
             
-            <div class="p-3.5 bg-amber-50/80 rounded-xl border border-amber-200/80 text-xs text-amber-900 mb-5 flex items-start gap-2.5">
-                <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-3.5 bg-amber-50/80 dark:bg-amber-500/10 rounded-xl border border-amber-200/80 dark:border-amber-500/25 text-xs text-amber-900 dark:text-amber-200 mb-5 flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div class="leading-relaxed">
@@ -402,20 +402,20 @@
             <div class="space-y-4 mb-6">
                 <!-- Saldo Awal Rekening BNI -->
                 <div>
-                    <label for="opening_bni_balance" class="block mb-1.5 text-sm font-semibold text-gray-800">
+                    <label for="opening_bni_balance" class="block mb-1.5 text-sm font-semibold text-gray-800 dark:text-zinc-200">
                         Saldo Rekening Agen BNI (Rp) <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm font-bold">Rp</span>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-zinc-400 text-sm font-bold">Rp</span>
                         <input type="number" step="any" min="0" name="opening_bni_balance" id="opening_bni_balance" required
                             value="{{ old('opening_bni_balance', $suggestedBniBalance > 0 ? $suggestedBniBalance : '') }}"
                             placeholder="Contoh: 5000000"
-                            class="pl-10 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono font-medium">
+                            class="pl-10 bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono font-medium">
                     </div>
                     @if($suggestedBniBalance > 0)
                         <div class="mt-1.5 flex items-center justify-between text-xs">
-                            <span class="text-gray-500">Sisa saldo hari kemarin: <strong>Rp {{ number_format($suggestedBniBalance, 0, ',', '.') }}</strong></span>
-                            <button type="button" onclick="document.getElementById('opening_bni_balance').value = '{{ $suggestedBniBalance }}'" class="text-orange-600 hover:text-orange-700 font-medium hover:underline">
+                            <span class="text-gray-500 dark:text-zinc-400">Sisa saldo hari kemarin: <strong>Rp {{ number_format($suggestedBniBalance, 0, ',', '.') }}</strong></span>
+                            <button type="button" onclick="document.getElementById('opening_bni_balance').value = '{{ $suggestedBniBalance }}'" class="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium hover:underline cursor-pointer">
                                 Gunakan Sisa Kemarin
                             </button>
                         </div>
@@ -424,35 +424,35 @@
 
                 <!-- Kas Tunai Laci -->
                 <div>
-                    <label for="opening_cash_balance" class="block mb-1.5 text-sm font-semibold text-gray-800">
-                        Uang Kas Tunai di Laci Kasir (Rp) <span class="text-xs font-normal text-gray-500">(Opsional)</span>
+                    <label for="opening_cash_balance" class="block mb-1.5 text-sm font-semibold text-gray-800 dark:text-zinc-200">
+                        Uang Kas Tunai di Laci Kasir (Rp) <span class="text-xs font-normal text-gray-500 dark:text-zinc-400">(Opsional)</span>
                     </label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm font-bold">Rp</span>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-zinc-400 text-sm font-bold">Rp</span>
                         <input type="number" step="any" min="0" name="opening_cash_balance" id="opening_cash_balance"
                             value="{{ old('opening_cash_balance', 0) }}"
                             placeholder="Contoh: 500000"
-                            class="pl-10 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono">
+                            class="pl-10 bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono">
                     </div>
-                    <span class="text-[11px] text-gray-400 mt-1 block">Uang kembalian / modal kas fisik di laci saat loket dibuka.</span>
+                    <span class="text-[11px] text-gray-400 dark:text-zinc-500 mt-1 block">Uang kembalian / modal kas fisik di laci saat loket dibuka.</span>
                 </div>
 
                 <!-- Catatan -->
                 <div>
-                    <label for="opening_notes" class="block mb-1.5 text-sm font-semibold text-gray-800">
-                        Catatan Pembukaan Loket <span class="text-xs font-normal text-gray-500">(Opsional)</span>
+                    <label for="opening_notes" class="block mb-1.5 text-sm font-semibold text-gray-800 dark:text-zinc-200">
+                        Catatan Pembukaan Loket <span class="text-xs font-normal text-gray-500 dark:text-zinc-400">(Opsional)</span>
                     </label>
                     <input type="text" name="notes" id="opening_notes" value="{{ old('notes') }}"
                         placeholder="Contoh: Saldo disesuaikan mutasi pagi jam 07:30"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5">
+                        class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5">
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onclick="closeOpeningBalanceModal()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <button type="button" onclick="closeOpeningBalanceModal()" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors cursor-pointer">
                     Nanti Saja
                 </button>
-                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
@@ -464,8 +464,8 @@
 </div>
 
 <!-- Modal Presensi Shift Kasir -->
-<div id="attendanceModal" class="fixed inset-0 z-50 flex items-center justify-center {{ ($hasOpeningBalance && ! $hasAttendance) ? '' : 'hidden' }} bg-black/50 backdrop-blur-xs transition-opacity p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
+<div id="attendanceModal" class="fixed inset-0 z-50 flex items-center justify-center {{ ($hasOpeningBalance && ! $hasAttendance) ? '' : 'hidden' }} bg-black/50 dark:bg-black/75 backdrop-blur-xs transition-opacity p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 dark:border-zinc-800">
         <div class="px-6 py-5 bg-gradient-to-r from-blue-600 to-teal-600 text-white flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
@@ -487,17 +487,17 @@
             @csrf
 
             <div class="mb-5">
-                <label for="attendance_student_note" class="block mb-1.5 text-sm font-semibold text-gray-800">
+                <label for="attendance_student_note" class="block mb-1.5 text-sm font-semibold text-gray-800 dark:text-zinc-200">
                     Catatan Kehadiran / Shift <span class="text-red-500">*</span>
                 </label>
                 <textarea name="student_note" id="attendance_student_note" rows="3" maxlength="255" required
                     placeholder="Contoh: Hadir bertugas shift pagi, kondisi loket dan printer siap."
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ old('student_note', $todayAttendance?->student_note) }}</textarea>
-                <span class="text-[11px] text-gray-400 mt-1 block">Wajib diisi sebelum memproses transaksi pada shift hari ini.</span>
+                    class="bg-gray-50 dark:bg-zinc-950/60 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 dark:placeholder-zinc-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ old('student_note', $todayAttendance?->student_note) }}</textarea>
+                <span class="text-[11px] text-gray-400 dark:text-zinc-500 mt-1 block">Wajib diisi sebelum memproses transaksi pada shift hari ini.</span>
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onclick="closeAttendanceModal()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer">
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <button type="button" onclick="closeAttendanceModal()" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors cursor-pointer">
                     Nanti Saja
                 </button>
                 <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
@@ -611,21 +611,21 @@
                     container.innerHTML = '';
                     data.forEach(item => {
                         const div = document.createElement('div');
-                        div.className = 'p-2.5 hover:bg-orange-50 cursor-pointer text-xs flex justify-between items-center transition-colors';
+                        div.className = 'p-2.5 hover:bg-orange-50 dark:hover:bg-orange-500/15 cursor-pointer text-xs flex justify-between items-center transition-colors';
                         
                         const selectedOption = typeSelect ? typeSelect.options[typeSelect.selectedIndex] : null;
                         const isSpp = checkIsSpp(selectedOption);
 
                         let identDisplay = item.customer_identifier;
                         if (isSpp && item.customer_identifier.startsWith('98844565')) {
-                            identDisplay = `<span class="text-gray-400 font-mono font-medium">98844565</span><span class="font-bold font-mono text-orange-600">${item.customer_identifier.substring(8)}</span>`;
+                            identDisplay = `<span class="text-gray-400 dark:text-zinc-500 font-mono font-medium">98844565</span><span class="font-bold font-mono text-orange-600 dark:text-orange-400">${item.customer_identifier.substring(8)}</span>`;
                         } else {
-                            identDisplay = `<span class="font-bold text-gray-800">${item.customer_identifier}</span>`;
+                            identDisplay = `<span class="font-bold text-gray-800 dark:text-zinc-100">${item.customer_identifier}</span>`;
                         }
 
                         div.innerHTML = `
                             <div class="flex items-center gap-1">${identDisplay}</div>
-                            <span class="text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded text-[11px] font-medium">${item.customer_name}</span>
+                            <span class="text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 px-2 py-0.5 rounded text-[11px] font-medium">${item.customer_name}</span>
                         `;
                         div.addEventListener('click', () => {
                             let identVal = item.customer_identifier;
