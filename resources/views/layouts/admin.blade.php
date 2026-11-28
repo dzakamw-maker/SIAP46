@@ -1,13 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex h-screen bg-gray-100 dark:bg-zinc-950 transition-colors duration-200">
+<div class="flex h-screen overflow-hidden bg-gray-100 dark:bg-zinc-950 transition-colors duration-200">
+    <!-- Mobile Sidebar Backdrop -->
+    <div data-sidebar-backdrop onclick="window.toggleSidebar && window.toggleSidebar(false)" aria-hidden="true" class="fixed inset-0 z-30 bg-black/40 dark:bg-black/60 backdrop-blur-[1px] opacity-0 invisible pointer-events-none transition-all duration-200 md:hidden"></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-teal-800 dark:bg-[#004750] text-white flex flex-col border-r border-transparent dark:border-teal-900/60">
-        <a href="{{ url('/') }}" class="h-16 flex items-center justify-center border-b border-teal-700 dark:border-white/10">
-            <h1 class="text-xl font-bold">Agen BNI Admin</h1>
-        </a>
-        <nav class="flex-1 px-4 py-6 space-y-2">
+    <aside id="appSidebar" data-sidebar class="w-64 shrink-0 bg-teal-800 dark:bg-[#004750] text-white flex flex-col border-r border-transparent dark:border-teal-900/60 transition-all duration-200 ease-in-out">
+        <div class="h-16 px-4 flex items-center justify-between md:justify-center border-b border-teal-700 dark:border-white/10 shrink-0">
+            <a href="{{ url('/') }}" class="flex items-center">
+                <h1 class="text-xl font-bold whitespace-nowrap">Agen BNI Admin</h1>
+            </a>
+            <button type="button" onclick="window.toggleSidebar && window.toggleSidebar(false)" aria-label="Tutup Sidebar" title="Tutup Sidebar" class="md:hidden p-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-teal-700 dark:hover:bg-white/10 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <a href="{{ url('/') }}" class="flex items-center px-4 py-3 {{ request()->is('/') || request()->routeIs('admin.dashboard') ? 'bg-teal-900 dark:bg-white/15 text-white dark:ring-1 dark:ring-white/20' : 'hover:bg-teal-700 dark:hover:bg-white/10' }} rounded-lg transition-colors">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Dashboard
@@ -29,7 +39,7 @@
                 Kelola User
             </a>
         </nav>
-        <div class="p-4 border-t border-teal-700 dark:border-white/10">
+        <div class="p-4 border-t border-teal-700 dark:border-white/10 shrink-0">
             <button type="button" onclick="document.getElementById('logoutModal').classList.remove('hidden')" class="flex items-center px-4 py-2 hover:bg-teal-700 dark:hover:bg-white/10 rounded transition-colors text-sm w-full text-left cursor-pointer">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 Logout
@@ -38,12 +48,15 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center px-6 justify-between transition-colors duration-200">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-zinc-100">@yield('page_title', 'Dashboard')</h2>
-            <div class="flex items-center gap-3">
+    <main class="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center px-4 sm:px-6 justify-between gap-3 shrink-0 transition-colors duration-200">
+            <div class="flex items-center gap-3 min-w-0">
+                <x-sidebar-toggle class="p-2 shrink-0" />
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-zinc-100 truncate">@yield('page_title', 'Dashboard')</h2>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
                 <x-theme-toggle class="p-2" />
-                <span class="text-sm font-medium text-gray-600 dark:text-zinc-300">Halo, {{ auth()->user()->full_name }}</span>
+                <span class="hidden sm:inline text-sm font-medium text-gray-600 dark:text-zinc-300">Halo, {{ auth()->user()->full_name }}</span>
                 <img class="h-8 w-8 rounded-full bg-gray-300 dark:bg-zinc-700" src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->full_name) }}&background=0D8ABC&color=fff" alt="Profile">
             </div>
         </header>

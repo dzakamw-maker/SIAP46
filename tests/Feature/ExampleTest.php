@@ -115,4 +115,44 @@ class ExampleTest extends TestCase
         $kasirResponse->assertSee('data-theme-toggle', false);
         $kasirResponse->assertSee('dark:bg-zinc-900', false);
     }
+
+    public function test_collapsible_sidebar_controls_render_in_admin_and_cashier_layouts(): void
+    {
+        $guestHome = $this->get('/');
+        $guestHome->assertStatus(200);
+        $guestHome->assertDontSee('id="appSidebar"', false);
+        $guestHome->assertDontSee('aria-controls="appSidebar"', false);
+
+        $adminRole = Role::create(['name' => 'Admin']);
+        $admin = User::create([
+            'role_id' => $adminRole->id,
+            'full_name' => 'Admin Sidebar',
+            'username' => 'adminsidebar',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $adminResponse = $this->actingAs($admin)->get('/');
+        $adminResponse->assertStatus(200);
+        $adminResponse->assertSee('id="appSidebar"', false);
+        $adminResponse->assertSee('aria-controls="appSidebar"', false);
+        $adminResponse->assertSee('data-sidebar-backdrop', false);
+        $adminResponse->assertSee('window.toggleSidebar', false);
+
+        $kasirRole = Role::create(['name' => 'Kasir']);
+        $kasir = User::create([
+            'role_id' => $kasirRole->id,
+            'full_name' => 'Kasir Sidebar',
+            'username' => 'kasirsidebar',
+            'password' => 'secret123',
+            'is_active' => true,
+        ]);
+
+        $kasirResponse = $this->actingAs($kasir)->get('/');
+        $kasirResponse->assertStatus(200);
+        $kasirResponse->assertSee('id="appSidebar"', false);
+        $kasirResponse->assertSee('aria-controls="appSidebar"', false);
+        $kasirResponse->assertSee('data-sidebar-backdrop', false);
+        $kasirResponse->assertSee('window.toggleSidebar', false);
+    }
 }

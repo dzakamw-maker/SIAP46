@@ -51,6 +51,94 @@
                 });
             }
         })();
+
+        (function () {
+            const storageKey = 'siap46-sidebar';
+            const root = document.documentElement;
+            const desktopQuery = window.matchMedia ? window.matchMedia('(min-width: 768px)') : null;
+
+            function isDesktop() {
+                return desktopQuery ? desktopQuery.matches : window.innerWidth >= 768;
+            }
+
+            function getDesktopOpen() {
+                try {
+                    return localStorage.getItem(storageKey) !== 'closed';
+                } catch (e) {
+                    return true;
+                }
+            }
+
+            function isSidebarOpen() {
+                return isDesktop()
+                    ? !root.classList.contains('sidebar-collapsed')
+                    : root.classList.contains('sidebar-mobile-open');
+            }
+
+            function syncSidebarUI() {
+                const open = isSidebarOpen();
+                const label = open ? 'Tutup Sidebar' : 'Buka Sidebar';
+
+                document.querySelectorAll('[data-sidebar-toggle]').forEach(function (btn) {
+                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    btn.setAttribute('title', label);
+                    btn.setAttribute('aria-label', label);
+                });
+
+                document.querySelectorAll('[data-sidebar]').forEach(function (aside) {
+                    aside.setAttribute('aria-hidden', open ? 'false' : 'true');
+                    aside.inert = !open;
+                });
+
+                document.querySelectorAll('[data-sidebar-backdrop]').forEach(function (backdrop) {
+                    backdrop.setAttribute('aria-hidden', !isDesktop() && open ? 'false' : 'true');
+                });
+            }
+
+            if (!getDesktopOpen()) {
+                root.classList.add('sidebar-collapsed');
+            }
+
+            window.toggleSidebar = function (forceState) {
+                if (isDesktop()) {
+                    const nextOpen = typeof forceState === 'boolean'
+                        ? forceState
+                        : root.classList.contains('sidebar-collapsed');
+
+                    root.classList.toggle('sidebar-collapsed', !nextOpen);
+                    try {
+                        localStorage.setItem(storageKey, nextOpen ? 'open' : 'closed');
+                    } catch (e) {}
+                } else {
+                    const nextOpen = typeof forceState === 'boolean'
+                        ? forceState
+                        : !root.classList.contains('sidebar-mobile-open');
+
+                    root.classList.toggle('sidebar-mobile-open', nextOpen);
+                }
+
+                syncSidebarUI();
+            };
+
+            document.addEventListener('DOMContentLoaded', syncSidebarUI);
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !isDesktop() && root.classList.contains('sidebar-mobile-open')) {
+                    window.toggleSidebar(false);
+                    const toggleBtn = document.querySelector('[data-sidebar-toggle]');
+                    if (toggleBtn) toggleBtn.focus();
+                }
+            });
+
+            if (desktopQuery) {
+                desktopQuery.addEventListener('change', function (e) {
+                    if (e.matches) {
+                        root.classList.remove('sidebar-mobile-open');
+                    }
+                    syncSidebarUI();
+                });
+            }
+        })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
